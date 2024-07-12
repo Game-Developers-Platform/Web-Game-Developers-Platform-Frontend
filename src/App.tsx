@@ -6,6 +6,7 @@ import HomePage from "./pages/home/Home.page"
 import SignInPage from "./pages/signIn/SignIn.page"
 import SignUpPage from "./pages/signUp/SignUp.page"
 import MyGamesPage from "./pages/games/MyGames.page"
+import AddGamePage from "./pages/games/AddGame.page"
 import ProfilePage from "./pages/profile/Profile.page"
 import PrivateRoutes from "./pages/privateRoutes/PrivateRoutes.page"
 import Navbar from "./component/navbar/Navbar"
@@ -35,6 +36,11 @@ const router = [{
 {
   path: "/myGames",
   component: MyGamesPage ,
+  isPrivate: true
+},
+{
+  path: "/addGame",
+  component: AddGamePage ,
   isPrivate: true
 },
 ]
