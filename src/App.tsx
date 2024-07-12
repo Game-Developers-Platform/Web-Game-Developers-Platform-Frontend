@@ -53,10 +53,11 @@ const BoxContent = styled(Box)({
 });
 
 const App = () => {
+  const isAuthenticated = true;//TODO 
   return (
     <Router>
       <BoxContainer>
-        <Navbar/>
+        {isAuthenticated && <Navbar/>}
         <BoxContent>
           <Routes>
             { 
