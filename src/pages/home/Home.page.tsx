@@ -1,7 +1,12 @@
+import GameCard from "../../component/GameCard"
+
 const HomePage= () => {
   return (
     <div>
-      home
+      <GameCard/>
+      <GameCard/>
+      <GameCard/>
+      <GameCard/>
     </div>
   )
 }

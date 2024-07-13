@@ -8,6 +8,7 @@ import SignUpPage from "./pages/signUp/SignUp.page"
 import MyGamesPage from "./pages/games/MyGames.page"
 import AddGamePage from "./pages/games/AddGame.page"
 import ProfilePage from "./pages/profile/Profile.page"
+import GamePage from "./pages/games/Game.page"
 import PrivateRoutes from "./pages/privateRoutes/PrivateRoutes.page"
 import Navbar from "./component/navbar/Navbar"
 import Footer from "./component/footer/Footer"
@@ -43,6 +44,11 @@ const router = [{
   component: AddGamePage ,
   isPrivate: true
 },
+{
+  path: "/game",
+  component: GamePage ,
+  isPrivate: true
+},
 ]
 
 
@@ -59,7 +65,7 @@ const BoxContent = styled(Box)({
 });
 
 const App = () => {
-  const isAuthenticated = true;//TODO 
+  const isAuthenticated = true;//TODO - call function to authenticate the token, if token exists.
   return (
     <Router>
       <BoxContainer>
