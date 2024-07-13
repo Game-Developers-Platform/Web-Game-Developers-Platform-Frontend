@@ -16,13 +16,13 @@ const GameCard = ({image, title, description, id}: {image: string, title:string,
   const navigate = useNavigate();
 
   return (
-    <Card sx={{ maxWidth: 345 }}>
+    <Card sx={{ maxWidth: 345, display:'flex', flexDirection:'column' }}>
       <CardMedia
         sx={{ height: 140 }}
         image={gameImage}
         title={gameTitle}
       />
-      <CardContent>
+      <CardContent sx = {{flex:1}}>
         <Typography gutterBottom variant="h5" component="div">
           {gameTitle}
         </Typography>
@@ -30,7 +30,7 @@ const GameCard = ({image, title, description, id}: {image: string, title:string,
         {gameDescription}
         </Typography>
       </CardContent>
-      <CardActions>
+      <CardActions sx = {{justifyContent:'space-between'}}>
         <Button size="small" onClick={() => navigate("/game")}>Game Page</Button>
         <Button size="small" onClick={() => navigate("/profile")}>Developer Page</Button>
       </CardActions>
