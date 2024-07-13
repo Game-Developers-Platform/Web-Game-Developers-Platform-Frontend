@@ -5,8 +5,13 @@ import CardMedia from '@mui/material/CardMedia';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 
-const GameCard = () => {
+const GameCard = ({image, title, description, id}: {image: string, title:string, description:string, id:number}) => {
+
+  const [gameImage, setGameImage] = useState(image);
+  const [gameTitle, setGameTitle] = useState(title);
+  const [gameDescription, setGameDescription] = useState(description);
 
   const navigate = useNavigate();
 
@@ -14,16 +19,15 @@ const GameCard = () => {
     <Card sx={{ maxWidth: 345 }}>
       <CardMedia
         sx={{ height: 140 }}
-        image="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1151640/header.jpg?t=1717621265"
-        title="Horizon Zero Dawn"
+        image={gameImage}
+        title={gameTitle}
       />
       <CardContent>
         <Typography gutterBottom variant="h5" component="div">
-          Horizon Zero Dawn
+          {gameTitle}
         </Typography>
         <Typography variant="body2" color="text.secondary">
-        Experience Aloy’s legendary quest to unravel the mysteries of a future Earth ruled by Machines.
-        Use devastating tactical attacks against your prey and explore a majestic open world in this award-winning action RPG!
+        {gameDescription}
         </Typography>
       </CardContent>
       <CardActions>
