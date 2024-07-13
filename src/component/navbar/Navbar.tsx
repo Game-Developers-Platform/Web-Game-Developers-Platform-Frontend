@@ -17,14 +17,45 @@ import { useNavigate } from 'react-router-dom';
 const pages = [{title: "My Games", path:"/myGames"},{title: "Add Game", path:"/addGame"}];
 const settings = [{title: "Profile", path:"/profile"}, {title: "Logout", path:"/signIn"}];
 
+interface NavbarTitleProps {
+  display: string;
+  variant: "h6" | "h5" | "h4" | "h3" | "h2" | "h1";
+}
+
+const NavbarTitle = ({ display, variant }: NavbarTitleProps) => (
+  <>
+    <AdbIcon sx={{ display: display, mr: 1 }} />
+    <Typography
+      variant={variant}
+      noWrap
+      component="a"
+      href="/"
+      sx={{
+        mr: 2,
+        display: display,
+        flexGrow: 1,
+        fontFamily: 'monospace',
+        fontWeight: 700,
+        letterSpacing: '.1rem',
+        color: 'inherit',
+        textDecoration: 'none',
+        fontSize: {xs: '1.1rem', sm: '1.5rem', md: '1.75rem', lg: '2rem' },
+      }}
+    >
+      Game-Developers-Platform
+    </Typography>
+  </>
+);
+
 const Navbar = () => {
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
-  const navigate = useNavigate();
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
+  const navigate = useNavigate();
 
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElNav(event.currentTarget);
   };
+
   const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElUser(event.currentTarget);
   };
@@ -39,27 +70,11 @@ const Navbar = () => {
     navigate(path);
   };
 
-  //TODO - Add hover effect for buttons and App Title.
   return (
     <AppBar position="static">
       <Container maxWidth="xl">
         <Toolbar disableGutters>
-          <AdbIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} />
-          <Typography
-            variant="h6"
-            noWrap
-            component="a"
-            href="/"
-            sx={{
-              mr: 2,
-              display: { xs: 'none', md: 'flex' },
-              fontFamily: 'monospace',
-              color: 'inherit',
-              textDecoration: 'none',
-            }}
-          >
-            Game-Developers-Platform
-          </Typography>
+          <NavbarTitle display={{ xs: 'none', md: 'flex' }} variant="h6" />
 
           <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
             <IconButton
@@ -97,25 +112,9 @@ const Navbar = () => {
               ))}
             </Menu>
           </Box>
-          <AdbIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} />
-          <Typography
-            variant="h5"
-            noWrap
-            component="a"
-            href="/"
-            sx={{
-              mr: 2,
-              display: { xs: 'flex', md: 'none' },
-              flexGrow: 1,
-              fontFamily: 'monospace',
-              fontWeight: 700,
-              letterSpacing: '.3rem',
-              color: 'inherit',
-              textDecoration: 'none',
-            }}
-          >
-            Game Developers Platform
-          </Typography>
+
+          <NavbarTitle display={{ xs: 'flex', md: 'none' }} variant="h5" />
+
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
             {pages.map(({title, path}) => (
               <Button
@@ -161,5 +160,6 @@ const Navbar = () => {
       </Container>
     </AppBar>
   );
-}
+};
+
 export default Navbar;
