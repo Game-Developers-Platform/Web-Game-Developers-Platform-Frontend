@@ -17,7 +17,12 @@ import { useNavigate } from 'react-router-dom';
 const pages = [{title: "My Games", path:"/myGames"},{title: "Add Game", path:"/addGame"}];
 const settings = [{title: "Profile", path:"/profile"}, {title: "Logout", path:"/signIn"}];
 
-const NavbarTitle = ({ display, variant }) => (
+interface NavbarTitleProps {
+  display: string;
+  variant: "h6" | "h5" | "h4" | "h3" | "h2" | "h1";
+}
+
+const NavbarTitle = ({ display, variant }: NavbarTitleProps) => (
   <>
     <AdbIcon sx={{ display: display, mr: 1 }} />
     <Typography
@@ -34,7 +39,7 @@ const NavbarTitle = ({ display, variant }) => (
         letterSpacing: '.1rem',
         color: 'inherit',
         textDecoration: 'none',
-        fontSize: { xs: '1.1rem', sm: '1.5rem', md: '1.75rem', lg: '2rem' },
+        fontSize: {xs: '1.1rem', sm: '1.5rem', md: '1.75rem', lg: '2rem' },
       }}
     >
       Game-Developers-Platform
