@@ -18,7 +18,7 @@ const pages = [{title: "My Games", path:"/myGames"},{title: "Add Game", path:"/a
 const settings = [{title: "Profile", path:"/profile"}, {title: "Logout", path:"/signIn"}];
 
 interface NavbarTitleProps {
-  display: string;
+  display: {xs: string, md:string};
   variant: "h6" | "h5" | "h4" | "h3" | "h2" | "h1";
 }
 
