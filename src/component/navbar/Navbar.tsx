@@ -1,24 +1,31 @@
-import * as React from 'react';
-import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
-import Toolbar from '@mui/material/Toolbar';
-import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
-import Menu from '@mui/material/Menu';
-import MenuIcon from '@mui/icons-material/Menu';
-import Container from '@mui/material/Container';
-import Avatar from '@mui/material/Avatar';
-import Button from '@mui/material/Button';
-import Tooltip from '@mui/material/Tooltip';
-import MenuItem from '@mui/material/MenuItem';
-import AdbIcon from '@mui/icons-material/Adb';
-import { useNavigate } from 'react-router-dom';
+import * as React from "react";
+import AppBar from "@mui/material/AppBar";
+import Box from "@mui/material/Box";
+import Toolbar from "@mui/material/Toolbar";
+import IconButton from "@mui/material/IconButton";
+import Typography from "@mui/material/Typography";
+import Menu from "@mui/material/Menu";
+import MenuIcon from "@mui/icons-material/Menu";
+import Container from "@mui/material/Container";
+import Avatar from "@mui/material/Avatar";
+import Button from "@mui/material/Button";
+import Tooltip from "@mui/material/Tooltip";
+import MenuItem from "@mui/material/MenuItem";
+import AdbIcon from "@mui/icons-material/Adb";
+import { useNavigate } from "react-router-dom";
+import muiTheme from "../../themes/muiTheme";
 
-const pages = [{title: "My Games", path:"/myGames"},{title: "Add Game", path:"/addGame"}];
-const settings = [{title: "Profile", path:"/profile"}, {title: "Logout", path:"/signIn"}];
+const pages = [
+  { title: "My Games", path: "/myGames" },
+  { title: "Add Game", path: "/addGame" },
+];
+const settings = [
+  { title: "Profile", path: "/profile" },
+  { title: "Logout", path: "/signIn" },
+];
 
 interface NavbarTitleProps {
-  display: {xs: string, md:string};
+  display: { xs: string; md: string };
   variant: "h6" | "h5" | "h4" | "h3" | "h2" | "h1";
 }
 
@@ -34,12 +41,11 @@ const NavbarTitle = ({ display, variant }: NavbarTitleProps) => (
         mr: 2,
         display: display,
         flexGrow: 1,
-        fontFamily: 'monospace',
         fontWeight: 700,
-        letterSpacing: '.1rem',
-        color: 'inherit',
-        textDecoration: 'none',
-        fontSize: {xs: '1.1rem', sm: '1.5rem', md: '1.75rem', lg: '2rem' },
+        letterSpacing: ".1rem",
+        color: "inherit",
+        textDecoration: "none",
+        fontSize: { xs: "1.1rem", sm: "1.5rem", md: "1.75rem", lg: "2rem" },
       }}
     >
       Game-Developers-Platform
@@ -48,8 +54,12 @@ const NavbarTitle = ({ display, variant }: NavbarTitleProps) => (
 );
 
 const Navbar = () => {
-  const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
-  const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
+  const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
+    null
+  );
+  const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(
+    null
+  );
   const navigate = useNavigate();
 
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -71,12 +81,18 @@ const Navbar = () => {
   };
 
   return (
-    <AppBar position="static">
+    <AppBar
+      position="static"
+      sx={{
+        backgroundColor: muiTheme.palette.secondary.main,
+        color: muiTheme.palette.text.secondary,
+      }}
+    >
       <Container maxWidth="xl">
         <Toolbar disableGutters>
-          <NavbarTitle display={{ xs: 'none', md: 'flex' }} variant="h6" />
+          <NavbarTitle display={{ xs: "none", md: "flex" }} variant="h6" />
 
-          <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
+          <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
             <IconButton
               size="large"
               aria-label="account of current user"
@@ -91,21 +107,21 @@ const Navbar = () => {
               id="menu-appbar"
               anchorEl={anchorElNav}
               anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left',
+                vertical: "bottom",
+                horizontal: "left",
               }}
               keepMounted
               transformOrigin={{
-                vertical: 'top',
-                horizontal: 'left',
+                vertical: "top",
+                horizontal: "left",
               }}
               open={Boolean(anchorElNav)}
               onClose={handleCloseNavMenu}
               sx={{
-                display: { xs: 'block', md: 'none' },
+                display: { xs: "block", md: "none" },
               }}
             >
-              {pages.map(({title, path}) => (
+              {pages.map(({ title, path }) => (
                 <MenuItem key={title} onClick={() => handleCloseNavMenu(path)}>
                   <Typography textAlign="center">{title}</Typography>
                 </MenuItem>
@@ -113,14 +129,14 @@ const Navbar = () => {
             </Menu>
           </Box>
 
-          <NavbarTitle display={{ xs: 'flex', md: 'none' }} variant="h5" />
+          <NavbarTitle display={{ xs: "flex", md: "none" }} variant="h5" />
 
-          <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-            {pages.map(({title, path}) => (
+          <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
+            {pages.map(({ title, path }) => (
               <Button
                 key={title}
                 onClick={() => handleCloseNavMenu(path)}
-                sx={{ my: 2, color: 'white', display: 'block' }}
+                sx={{ my: 2, color: "white", display: "block" }}
               >
                 {title}
               </Button>
@@ -134,22 +150,22 @@ const Navbar = () => {
               </IconButton>
             </Tooltip>
             <Menu
-              sx={{ mt: '45px' }}
+              sx={{ mt: "45px" }}
               id="menu-appbar"
               anchorEl={anchorElUser}
               anchorOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
+                vertical: "top",
+                horizontal: "right",
               }}
               keepMounted
               transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
+                vertical: "top",
+                horizontal: "right",
               }}
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu}
             >
-              {settings.map(({title, path}) => (
+              {settings.map(({ title, path }) => (
                 <MenuItem key={title} onClick={() => handleCloseUserMenu(path)}>
                   <Typography textAlign="center">{title}</Typography>
                 </MenuItem>

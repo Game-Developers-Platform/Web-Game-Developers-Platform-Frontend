@@ -6,33 +6,30 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
+import muiTheme from '../themes/muiTheme';
 
 const GameCard = ({image, title, description, id}: {image: string, title:string, description:string, id:number}) => {
-
-  const [gameImage, setGameImage] = useState(image);
-  const [gameTitle, setGameTitle] = useState(title);
-  const [gameDescription, setGameDescription] = useState(description);
 
   const navigate = useNavigate();
 
   return (
-    <Card sx={{ maxWidth: 345, display:'flex', flexDirection:'column' }}>
+    <Card key={id} sx={{ maxWidth: 345, display:'flex', flexDirection:'column', backgroundColor:muiTheme.palette.background.default}}>
       <CardMedia
         sx={{ height: 140 }}
-        image={gameImage}
-        title={gameTitle}
+        image={image}
+        title={title}
       />
-      <CardContent sx = {{flex:1}}>
-        <Typography gutterBottom variant="h5" component="div">
-          {gameTitle}
+      <CardContent sx = {{flex:1, display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+        <Typography sx={{color:muiTheme.palette.text.title}} gutterBottom variant="h5" component="div">
+          {title}
         </Typography>
-        <Typography variant="body2" color="text.secondary">
-        {gameDescription}
+        <Typography sx={{color:muiTheme.palette.text.description}} variant="body2" color="text.secondary">
+        {description}
         </Typography>
       </CardContent>
       <CardActions sx = {{justifyContent:'space-between'}}>
-        <Button size="small" onClick={() => navigate("/game")}>Game Page</Button>
-        <Button size="small" onClick={() => navigate("/profile")}>Developer Page</Button>
+        <Button sx={{color:muiTheme.palette.text.button}} size="small" onClick={() => navigate("/game")}>Game Page</Button>
+        <Button sx={{color:muiTheme.palette.text.button}} size="small" onClick={() => navigate("/profile")}>Developer Page</Button>
       </CardActions>
     </Card>
   );
