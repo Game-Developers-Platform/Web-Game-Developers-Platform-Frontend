@@ -12,7 +12,7 @@ import {
   SelectChangeEvent,
 } from "@mui/material";
 import { Clear as ClearIcon } from "@mui/icons-material";
-import GameCard from "../../component/GameCard";
+import GameCard from "../../components/GameCard";
 import muiTheme from "../../themes/muiTheme";
 
 const defaultGameCardData = [

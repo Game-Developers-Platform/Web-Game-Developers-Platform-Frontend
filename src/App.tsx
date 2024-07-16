@@ -10,8 +10,8 @@ import AddGamePage from "./pages/games/AddGame.page";
 import ProfilePage from "./pages/profile/Profile.page";
 import GamePage from "./pages/games/Game.page";
 import PrivateRoutes from "./pages/privateRoutes/PrivateRoutes.page";
-import Navbar from "./component/navbar/Navbar";
-import Footer from "./component/footer/Footer";
+import Navbar from "./components/navbar/Navbar";
+import Footer from "./components/footer/Footer";
 
 const router = [
   { path: "/signIn", component: SignInPage, isPrivate: false },
@@ -40,7 +40,7 @@ const App = () => {
   return (
     <ThemeProvider theme={muiTheme}>
       <Router>
-        <BoxContainer sx={{backgroundColor: muiTheme.palette.primary.main}}>
+        <BoxContainer sx={{ backgroundColor: muiTheme.palette.primary.main }}>
           {isAuthenticated && <Navbar />}
           <BoxContent>
             <Routes>
