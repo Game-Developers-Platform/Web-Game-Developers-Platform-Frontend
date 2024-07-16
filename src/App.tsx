@@ -6,27 +6,26 @@ import HomePage from "./pages/home/Home.page";
 import SignInPage from "./pages/signIn/SignIn.page";
 import SignUpPage from "./pages/signUp/SignUp.page";
 import MyGamesPage from "./pages/games/MyGames.page";
-import AddGamePage from "./pages/games/AddGame.page";
 import ProfilePage from "./pages/profile/Profile.page";
 import GamePage from "./pages/games/Game.page";
 import PrivateRoutes from "./pages/privateRoutes/PrivateRoutes.page";
 import Navbar from "./components/navbar/Navbar";
 import Footer from "./components/footer/Footer";
 
-export interface IUser {
+export interface IGame {
   id: string;
   name: string;
-  email: string;
-  password: string;
-  profileImage: string;
-  socialNetworks: { platform: string; url: string }[];
-  gamesId: string[];
-  birthDate: Date;
+  price: number;
+  image: string;
+  description: string;
+  developerId: string;
+  platformLinks: { platform: string; url: string }[];
+  releaseDate: Date;
   views: number;
-  refreshTokens: string[];
+  categories: string[];
 }
 
-const currentUser: IUser = {
+const currentUser = {
   id: "1",
   name: "Lior Hassin",
   email: "liorhassin3@gmail.com",
@@ -39,14 +38,45 @@ const currentUser: IUser = {
   socialNetworks: [],
 };
 
+const exampleGame: IGame = {
+  id: "1",
+  name: "Horizon Zero Dawn",
+  price: 59.99,
+  image: "https://example.com/game-image.jpg",
+  description:
+    "Experience Aloy’s legendary quest to unravel the mysteries of a future Earth ruled by Machines.",
+  developerId: "developer123",
+  platformLinks: [
+    {
+      platform: "Steam",
+      url: "https://store.steampowered.com/horizon-zero-dawn",
+    },
+    {
+      platform: "Epic Games",
+      url: "https://www.epicgames.com/horizon-zero-dawn",
+    },
+    { platform: "Origin", url: "https://www.origin.com/horizon-zero-dawn" },
+  ],
+  releaseDate: new Date("2023-05-01"),
+  views: 1000,
+  categories: ["Action", "Adventure"],
+};
+
 const router = [
   { path: "/signIn", component: SignInPage, isPrivate: false },
   { path: "/signUp", component: SignUpPage, isPrivate: false },
   { path: "/", component: HomePage, isPrivate: true },
-  { path: "/profile", component: ProfilePage, isPrivate: true },
+  {
+    path: "/profile",
+    component: () => <ProfilePage user={currentUser} />,
+    isPrivate: true,
+  },
   { path: "/myGames", component: MyGamesPage, isPrivate: true },
-  { path: "/addGame", component: AddGamePage, isPrivate: true },
-  { path: "/game", component: GamePage, isPrivate: true },
+  {
+    path: "/game",
+    component: () => <GamePage game={exampleGame} user={currentUser} />,
+    isPrivate: true,
+  },
 ];
 
 const BoxContainer = styled(Box)({
@@ -77,14 +107,10 @@ const App = () => {
                   element={
                     isPrivate ? (
                       <PrivateRoutes>
-                        {path === "/profile" ? (
-                          <Component user={currentUser} />
-                        ) : (
-                          <Component user={currentUser} />
-                        )}
+                        <Component />
                       </PrivateRoutes>
                     ) : (
-                      <Component user={currentUser} />
+                      <Component />
                     )
                   }
                 />

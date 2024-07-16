@@ -13,6 +13,7 @@ import GameCard from "../../components/GameCard";
 import muiTheme from "../../themes/muiTheme";
 import { useNavigate } from "react-router-dom";
 
+//Change types location to a combined file.
 export interface IUser {
   id: string;
   name: string;
