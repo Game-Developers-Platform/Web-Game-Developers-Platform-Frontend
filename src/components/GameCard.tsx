@@ -20,11 +20,20 @@ const GameCard = ({
 }) => {
   const navigate = useNavigate();
 
+  const truncateText = (text: string, maxLength: number) => {
+    if (text.length > maxLength) {
+      return text.slice(0, maxLength) + "...";
+    } else {
+      return text;
+    }
+  };
+
   return (
     <Card
       key={id}
       sx={{
         maxWidth: 345,
+        maxHeight: 345,
         display: "flex",
         flexDirection: "column",
         backgroundColor: muiTheme.palette.background.default,
@@ -52,7 +61,7 @@ const GameCard = ({
           variant="body2"
           color="text.secondary"
         >
-          {description}
+          {truncateText(description, 140)}
         </Typography>
       </CardContent>
       <CardActions sx={{ justifyContent: "space-between" }}>

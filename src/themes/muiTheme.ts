@@ -7,6 +7,7 @@ declare module "@mui/material/styles" {
     title: string;
     description: string;
     button: string;
+    hover: string;
   }
 }
 
@@ -28,6 +29,7 @@ const theme = createTheme({
       description: "#31363F",
       button: "#1B1B1B",
       link: "#76ABAE",
+      hover: "#416263",
     },
   },
 });

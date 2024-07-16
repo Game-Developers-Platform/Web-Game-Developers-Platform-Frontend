@@ -10,6 +10,8 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/system";
 import GameCard from "../../components/GameCard";
+import muiTheme from "../../themes/muiTheme";
+import { useNavigate } from "react-router-dom";
 
 export interface IUser {
   id: string;
@@ -36,19 +38,6 @@ export interface IGame {
   views: number;
   categories: string[];
 }
-
-const currentUser: IUser = {
-  id: "1",
-  name: "Lior Hassin",
-  email: "liorhassin3@gmail.com",
-  password: "",
-  profileImage: "https://avatar.iran.liara.run/public/22",
-  birthDate: new Date("1994-01-01"),
-  gamesId: ["1", "2"],
-  views: 0,
-  refreshTokens: [],
-  socialNetworks: [],
-};
 
 const games: IGame[] = [
   {
@@ -81,9 +70,12 @@ const games: IGame[] = [
   },
 ];
 
+//TODO - add check between connected user and profilePage User id.
 const ProfilePage = ({ user }: { user: IUser }) => {
   const [isEditModalOpen, setEditModalOpen] = useState(false);
-  const isOwnProfile = currentUser.id === user.id;
+  const isOwnProfile = user.id === user.id;
+
+  const navigate = useNavigate();
 
   const handleOpenEditModal = () => setEditModalOpen(true);
   const handleCloseEditModal = () => setEditModalOpen(false);
@@ -107,6 +99,12 @@ const ProfilePage = ({ user }: { user: IUser }) => {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
+  }));
+
+  const CustomTextField = styled(TextField)(() => ({
+    "& .MuiInputBase-root": {
+      color: muiTheme.palette.text.secondary,
+    },
   }));
 
   const ModalContent = styled(Box)(({ theme }) => ({
@@ -142,7 +140,12 @@ const ProfilePage = ({ user }: { user: IUser }) => {
 
   return (
     <ProfileContainer>
-      <Typography variant="h4" component="h1" align="center">
+      <Typography
+        sx={{ color: muiTheme.palette.text.secondary }}
+        variant="h4"
+        component="h1"
+        align="center"
+      >
         {user.name}
       </Typography>
       <Avatar
@@ -151,28 +154,54 @@ const ProfilePage = ({ user }: { user: IUser }) => {
         sx={{ width: 150, height: 150 }}
       />
       <ProfileDetails>
-        <Typography variant="body1">
+        <Typography
+          sx={{ color: muiTheme.palette.text.secondary }}
+          variant="body1"
+        >
           Age: {calculateAge(user.birthDate)}
         </Typography>
-        <Typography variant="body1">
+        <Typography
+          sx={{ color: muiTheme.palette.text.secondary }}
+          variant="body1"
+        >
           Birthdate: {user.birthDate.toDateString()}
         </Typography>
-        <Typography variant="body1">
+        <Typography
+          sx={{ color: muiTheme.palette.text.secondary }}
+          variant="body1"
+        >
           Games Published: {user.gamesId.length}
         </Typography>
-        <Button variant="contained" color="primary">
+        <Button
+          sx={{ color: muiTheme.palette.text.secondary }}
+          onClick={() => navigate("/myGames")}
+          variant="contained"
+          color="primary"
+        >
           {isOwnProfile ? "My Games" : `${user.name}'s Games`}
         </Button>
         {isOwnProfile && (
           <Button
-            variant="outlined"
-            color="secondary"
+            sx={{ color: muiTheme.palette.text.secondary }}
+            variant="contained"
+            color="primary"
             onClick={handleOpenEditModal}
           >
             Edit Profile
           </Button>
         )}
       </ProfileDetails>
+
+      <Typography
+        sx={{ color: muiTheme.palette.text.secondary, marginTop: 2 }}
+        variant="h5"
+        component="h2"
+        align="center"
+      >
+        {isOwnProfile
+          ? "Your Most Viewed Games"
+          : `${user.name}'s Most Viewed Games`}
+      </Typography>
 
       <GamesGrid container spacing={2}>
         {sortedGames.map((game) => (
@@ -183,17 +212,21 @@ const ProfilePage = ({ user }: { user: IUser }) => {
       </GamesGrid>
 
       <EditModal open={isEditModalOpen} onClose={handleCloseEditModal}>
-        <ModalContent>
-          <Typography variant="h6" component="h2">
+        <ModalContent sx={{ backgroundColor: muiTheme.palette.primary.main }}>
+          <Typography
+            sx={{ color: muiTheme.palette.text.secondary }}
+            variant="h6"
+            component="h2"
+          >
             Edit Profile
           </Typography>
-          <TextField label="Name" defaultValue={user.name} fullWidth />
-          <TextField
+          <CustomTextField label="Name" defaultValue={user.name} fullWidth />
+          <CustomTextField
             label="Profile Image URL"
             defaultValue={user.profileImage}
             fullWidth
           />
-          <TextField
+          <CustomTextField
             label="Birthdate"
             type="date"
             defaultValue={user.birthDate.toISOString().split("T")[0]}
@@ -203,6 +236,13 @@ const ProfilePage = ({ user }: { user: IUser }) => {
             variant="contained"
             color="primary"
             onClick={handleCloseEditModal}
+            sx={{
+              backgroundColor: muiTheme.palette.background.default,
+              color: muiTheme.palette.secondary.main,
+              "&:hover": {
+                backgroundColor: muiTheme.palette.text.hover, // Change to your desired hover background color
+              },
+            }}
           >
             Save
           </Button>
@@ -212,11 +252,4 @@ const ProfilePage = ({ user }: { user: IUser }) => {
   );
 };
 
-// Usage example
-const App = () => {
-  const user: IUser = currentUser;
-
-  return <ProfilePage user={user} />;
-};
-
-export default App;
+export default ProfilePage;

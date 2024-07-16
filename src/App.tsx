@@ -13,6 +13,32 @@ import PrivateRoutes from "./pages/privateRoutes/PrivateRoutes.page";
 import Navbar from "./components/navbar/Navbar";
 import Footer from "./components/footer/Footer";
 
+export interface IUser {
+  id: string;
+  name: string;
+  email: string;
+  password: string;
+  profileImage: string;
+  socialNetworks: { platform: string; url: string }[];
+  gamesId: string[];
+  birthDate: Date;
+  views: number;
+  refreshTokens: string[];
+}
+
+const currentUser: IUser = {
+  id: "1",
+  name: "Lior Hassin",
+  email: "liorhassin3@gmail.com",
+  password: "",
+  profileImage: "https://avatar.iran.liara.run/public/22",
+  birthDate: new Date("1994-01-01"),
+  gamesId: ["1", "2"],
+  views: 0,
+  refreshTokens: [],
+  socialNetworks: [],
+};
+
 const router = [
   { path: "/signIn", component: SignInPage, isPrivate: false },
   { path: "/signUp", component: SignUpPage, isPrivate: false },
@@ -35,7 +61,7 @@ const BoxContent = styled(Box)({
 });
 
 const App = () => {
-  const isAuthenticated = true; // TODO: Implement authentication logic
+  const isAuthenticated = true; // TODO - Implement authentication logic
 
   return (
     <ThemeProvider theme={muiTheme}>
@@ -51,10 +77,14 @@ const App = () => {
                   element={
                     isPrivate ? (
                       <PrivateRoutes>
-                        <Component />
+                        {path === "/profile" ? (
+                          <Component user={currentUser} />
+                        ) : (
+                          <Component user={currentUser} />
+                        )}
                       </PrivateRoutes>
                     ) : (
-                      <Component />
+                      <Component user={currentUser} />
                     )
                   }
                 />

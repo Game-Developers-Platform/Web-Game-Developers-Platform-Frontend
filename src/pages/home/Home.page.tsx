@@ -19,38 +19,38 @@ const defaultGameCardData = [
   {
     image:
       "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1151640/header.jpg?t=1717621265",
-    title: "Horizon Zero Dawn",
+    name: "Horizon Zero Dawn",
     description:
       "Experience Aloy’s legendary quest to unravel the mysteries of a future Earth ruled by Machines. Use devastating tactical attacks against your prey and explore a majestic open world in this award-winning action RPG!",
     categories: ["Action", "Adventure"],
-    id: 1,
+    id: "1",
   },
   {
     image:
       "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2567870/header.jpg?t=1719621610",
-    title: "Chained Together",
+    name: "Chained Together",
     description:
       "From the depths of hell, climb chained to your friends through diverse worlds. Solo or co-op, try to reach the summit and discover what awaits you there...",
     categories: ["Adventure"],
-    id: 2,
+    id: "2",
   },
   {
     image:
       "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/105600/header.jpg?t=1666290860",
-    title: "Terraria",
+    name: "Terraria",
     description:
       "Dig, fight, explore, build! Nothing is impossible in this action-packed adventure game. Four Pack also available!",
     categories: ["Action", "Adventure"],
-    id: 3,
+    id: "3",
   },
   {
     image:
       "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/730/header.jpg?t=1719426374",
-    title: "Counter Strike 2",
+    name: "Counter Strike 2",
     description:
       "For over two decades, Counter-Strike has offered an elite competitive experience, one shaped by millions of players from across the globe. And now the next chapter in the CS story is about to begin. This is Counter-Strike 2.",
     categories: ["Action"],
-    id: 4,
+    id: "4",
   },
 ];
 
@@ -110,7 +110,7 @@ const HomePage = () => {
 
   const filteredGames = defaultGameCardData.filter((game) => {
     return (
-      game.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      game.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
       (filters.length === 0 ||
         filters.every((filter) => game.categories.includes(filter)))
     );
@@ -220,7 +220,6 @@ const HomePage = () => {
       </Grid>
       <FiltersBox>
         {filters.map((filter) => (
-          //TODO - Change chip style.
           <Chip
             sx={{
               backgroundColor: muiTheme.palette.secondary.main,
