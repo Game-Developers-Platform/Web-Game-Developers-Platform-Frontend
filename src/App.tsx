@@ -38,27 +38,35 @@ const currentUser = {
   socialNetworks: [],
 };
 
+/***
+ * {
+    image:
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/105600/header.jpg?t=1666290860",
+    name: "Terraria",
+    description:
+      "Dig, fight, explore, build! Nothing is impossible in this action-packed adventure game. Four Pack also available!",
+    categories: ["Action", "Adventure"],
+    id: "3",
+  }
+ */
+
 const exampleGame: IGame = {
   id: "1",
   name: "Horizon Zero Dawn",
-  price: 59.99,
-  image: "https://example.com/game-image.jpg",
+  price: 9.99,
+  image:
+    "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/105600/header.jpg?t=1666290860",
   description:
-    "Experience Aloy’s legendary quest to unravel the mysteries of a future Earth ruled by Machines.",
-  developerId: "developer123",
+    "Dig, fight, explore, build! Nothing is impossible in this action-packed adventure game. Four Pack also available!",
+  developerId: "3",
   platformLinks: [
     {
       platform: "Steam",
-      url: "https://store.steampowered.com/horizon-zero-dawn",
+      url: "https://store.steampowered.com/app/105600/Terraria/",
     },
-    {
-      platform: "Epic Games",
-      url: "https://www.epicgames.com/horizon-zero-dawn",
-    },
-    { platform: "Origin", url: "https://www.origin.com/horizon-zero-dawn" },
   ],
-  releaseDate: new Date("2023-05-01"),
-  views: 1000,
+  releaseDate: new Date("2011-05-16"),
+  views: 58,
   categories: ["Action", "Adventure"],
 };
 

@@ -18,7 +18,7 @@ const Footer = () => {
         <span>© 2024 Lior Hassin | Software Developer</span>
         <span>
           <Link
-            color={muiTheme.palette.text.link}
+            color={muiTheme.palette.text.details}
             href="mailto:liorhassin3@gmail.com"
             target="_blank"
             rel="noopener noreferrer"
@@ -27,7 +27,7 @@ const Footer = () => {
           </Link>{" "}
           |
           <Link
-            color={muiTheme.palette.text.link}
+            color={muiTheme.palette.text.details}
             href="https://www.linkedin.com/in/lior-hassin"
             target="_blank"
             rel="noopener noreferrer"
@@ -37,7 +37,7 @@ const Footer = () => {
           </Link>{" "}
           |
           <Link
-            color={muiTheme.palette.text.link}
+            color={muiTheme.palette.text.details}
             href="https://github.com/liorhassin"
             target="_blank"
             rel="noopener noreferrer"

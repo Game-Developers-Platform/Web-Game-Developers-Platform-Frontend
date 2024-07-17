@@ -1,16 +1,4 @@
-import {
-  Box,
-  Button,
-  Chip,
-  Grid,
-  IconButton,
-  styled,
-  Typography,
-} from "@mui/material";
-import {
-  GitHub as GitHubIcon,
-  Language as LanguageIcon,
-} from "@mui/icons-material";
+import { Box, Grid, Typography, Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import muiTheme from "../../themes/muiTheme";
 
@@ -43,95 +31,160 @@ export interface IUser {
 const GamePage = ({ game, user }: { game: IGame; user: IUser }) => {
   const navigate = useNavigate();
 
-  const isMyGame = game.developerId == user.id;
+  const isMyGame = game.developerId === user.id;
 
-  const handleDeveloperProfileClick = () => {
+  const handleProfileClick = () => {
     navigate(`/profile/${game.developerId}`);
   };
 
   return (
     <Box sx={{ flexGrow: 1, padding: 2 }}>
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={4}>
-          <Box
+      <Grid
+        container
+        direction="column"
+        alignItems="center"
+        justifyContent="center"
+      >
+        <Typography
+          sx={{
+            color: muiTheme.palette.text.details,
+            fontSize: "2rem",
+            marginBottom: 2,
+          }}
+        >
+          {game.name}
+        </Typography>
+        <Box
+          component="img"
+          sx={{
+            width: "100%",
+            maxWidth: { xs: 300, sm: 400, md: 500, lg: 600 },
+            height: "auto",
+            borderRadius: 1,
+            boxShadow: 3,
+            transition: "max-width 0.3s ease-in-out",
+            marginBottom: 2,
+          }}
+          alt={game.name}
+          src={game.image}
+        />
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            marginBottom: 2,
+          }}
+        >
+          <Typography
+            variant="h6"
             sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
+              color: muiTheme.palette.text.secondary,
+              marginBottom: 0.5,
             }}
           >
-            <img
-              src={game.image}
-              alt={game.name}
-              style={{
-                maxWidth: "100%",
-                maxHeight: "100%",
-                borderRadius: "8px",
-              }}
-            />
-          </Box>
-        </Grid>
-        <Grid item xs={12} md={8}>
-          <Typography
-            variant="h4"
-            component="h1"
-            sx={{ marginBottom: 2, color: muiTheme.palette.text.title }}
-          >
-            {game.name}
+            Price
           </Typography>
           <Typography
-            variant="body1"
-            sx={{ marginBottom: 2, color: muiTheme.palette.text.secondary }}
+            variant="h6"
+            sx={{
+              color: muiTheme.palette.text.details,
+              marginBottom: 1.5,
+            }}
           >
-            Price: {game.price}
+            ${game.price}
           </Typography>
           <Typography
-            variant="body1"
-            sx={{ marginBottom: 2, color: muiTheme.palette.text.secondary }}
+            variant="h6"
+            sx={{
+              color: muiTheme.palette.text.secondary,
+              marginBottom: 0.5, // Reduced margin
+            }}
           >
-            Release Date: {game.releaseDate.toDateString()}
+            Release Date
           </Typography>
           <Typography
-            variant="body1"
-            sx={{ marginBottom: 2, color: muiTheme.palette.text.secondary }}
+            variant="h6"
+            sx={{
+              color: muiTheme.palette.text.details,
+              marginBottom: 1.5,
+            }}
           >
-            Views: {game.views}
+            {new Date(game.releaseDate).toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
+          </Typography>
+        </Box>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            marginBottom: 2,
+            width: "50%",
+          }}
+        >
+          <Typography
+            variant="h6"
+            sx={{
+              color: muiTheme.palette.text.secondary,
+              marginBottom: 0.5,
+            }}
+          >
+            Description
           </Typography>
           <Typography
-            variant="body1"
-            sx={{ marginBottom: 2, color: muiTheme.palette.text.secondary }}
+            sx={{
+              color: muiTheme.palette.text.details,
+              textAlign: "center",
+            }}
           >
-            Categories: {game.categories.join(", ")}
+            {game.description}
+          </Typography>
+        </Box>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            marginBottom: 2,
+            width: "50%",
+          }}
+        >
+          <Typography
+            variant="h6"
+            sx={{
+              color: muiTheme.palette.text.secondary,
+              marginBottom: 0.5,
+            }}
+          >
+            Developer
           </Typography>
           <Typography
-            variant="body1"
-            sx={{ marginBottom: 2, color: muiTheme.palette.text.secondary }}
+            sx={{
+              color: muiTheme.palette.text.details,
+              textAlign: "center",
+              marginBottom: 1.5,
+            }}
           >
-            Description: {game.description}
+            {user.name}
           </Typography>
-          <Box sx={{ display: "flex", gap: "8px", marginBottom: 2 }}>
-            {game.platformLinks.map((platform, index) => (
-              <IconButton
-                key={index}
-                onClick={() => window.open(platform.url, "_blank")}
-                aria-label={`Visit ${platform.platform}`}
-                sx={{ color: muiTheme.palette.text.link }}
-              >
-                {platform.platform === "Steam" && <LanguageIcon />}
-                {platform.platform === "Epic Games" && <LanguageIcon />}
-                {platform.platform === "Origin" && <LanguageIcon />}
-              </IconButton>
-            ))}
-          </Box>
           <Button
             variant="contained"
-            color="primary"
-            onClick={handleDeveloperProfileClick}
-            sx={{ color: muiTheme.palette.text.button }}
+            sx={{
+              backgroundColor: muiTheme.palette.secondary.main,
+              color: muiTheme.palette.text.secondary,
+              "&:hover": {
+                backgroundColor: muiTheme.palette.primary.dark,
+              },
+            }}
+            onClick={handleProfileClick}
           >
-            {isMyGame ? "My Profile" : `${game.developerId}'s Profile`}
+            {isMyGame ? "My Profile" : "Developer Profile"}
           </Button>
-        </Grid>
+        </Box>
       </Grid>
     </Box>
   );
