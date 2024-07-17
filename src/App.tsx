@@ -11,19 +11,7 @@ import GamePage from "./pages/games/Game.page";
 import PrivateRoutes from "./pages/privateRoutes/PrivateRoutes.page";
 import Navbar from "./components/navbar/Navbar";
 import Footer from "./components/footer/Footer";
-
-export interface IGame {
-  id: string;
-  name: string;
-  price: number;
-  image: string;
-  description: string;
-  developerId: string;
-  platformLinks: { platform: string; url: string }[];
-  releaseDate: Date;
-  views: number;
-  categories: string[];
-}
+import { IGame } from "./utils/types/types.ts";
 
 const currentUser = {
   id: "1",
@@ -38,21 +26,9 @@ const currentUser = {
   socialNetworks: [],
 };
 
-/***
- * {
-    image:
-      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/105600/header.jpg?t=1666290860",
-    name: "Terraria",
-    description:
-      "Dig, fight, explore, build! Nothing is impossible in this action-packed adventure game. Four Pack also available!",
-    categories: ["Action", "Adventure"],
-    id: "3",
-  }
- */
-
 const exampleGame: IGame = {
   id: "1",
-  name: "Horizon Zero Dawn",
+  name: "Terraria",
   price: 9.99,
   image:
     "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/105600/header.jpg?t=1666290860",

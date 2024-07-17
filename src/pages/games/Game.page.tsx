@@ -1,32 +1,11 @@
-import { Box, Grid, Typography, Button } from "@mui/material";
+import { Box, Grid, Typography, Button, IconButton } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import muiTheme from "../../themes/muiTheme";
-
-export interface IGame {
-  id: string;
-  name: string;
-  price: number;
-  image: string;
-  description: string;
-  developerId: string;
-  platformLinks: { platform: string; url: string }[];
-  releaseDate: Date;
-  views: number;
-  categories: string[];
-}
-
-export interface IUser {
-  id: string;
-  name: string;
-  email: string;
-  password: string;
-  profileImage: string;
-  socialNetworks: { platform: string; url: string }[];
-  gamesId: string[];
-  birthDate: Date;
-  views: number;
-  refreshTokens: string[];
-}
+import steamLogo from "../../assets/icons/logo-steam.svg";
+import originLogo from "../../assets/icons/logo-origin.svg";
+import epicGamesLogo from "../../assets/icons/logo-epic-games.svg";
+import xboxLogo from "../../assets/icons/logo-xbox.svg";
+import { IGame, IUser } from "../../utils/types/types.ts";
 
 const GamePage = ({ game, user }: { game: IGame; user: IUser }) => {
   const navigate = useNavigate();
@@ -36,6 +15,13 @@ const GamePage = ({ game, user }: { game: IGame; user: IUser }) => {
   const handleProfileClick = () => {
     navigate(`/profile/${game.developerId}`);
   };
+
+  //TODO - Change to map between name and logo.
+
+  const platformLogoMap = new Map<string, string>([
+    ["Steam", steamLogo],
+    ["Origin", originLogo],
+  ]);
 
   return (
     <Box sx={{ flexGrow: 1, padding: 2 }}>
@@ -74,55 +60,6 @@ const GamePage = ({ game, user }: { game: IGame; user: IUser }) => {
             flexDirection: "column",
             alignItems: "center",
             marginBottom: 2,
-          }}
-        >
-          <Typography
-            variant="h6"
-            sx={{
-              color: muiTheme.palette.text.secondary,
-              marginBottom: 0.5,
-            }}
-          >
-            Price
-          </Typography>
-          <Typography
-            variant="h6"
-            sx={{
-              color: muiTheme.palette.text.details,
-              marginBottom: 1.5,
-            }}
-          >
-            ${game.price}
-          </Typography>
-          <Typography
-            variant="h6"
-            sx={{
-              color: muiTheme.palette.text.secondary,
-              marginBottom: 0.5, // Reduced margin
-            }}
-          >
-            Release Date
-          </Typography>
-          <Typography
-            variant="h6"
-            sx={{
-              color: muiTheme.palette.text.details,
-              marginBottom: 1.5,
-            }}
-          >
-            {new Date(game.releaseDate).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}
-          </Typography>
-        </Box>
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            marginBottom: 2,
             width: "50%",
           }}
         >
@@ -143,6 +80,93 @@ const GamePage = ({ game, user }: { game: IGame; user: IUser }) => {
           >
             {game.description}
           </Typography>
+        </Box>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "center",
+            alignItems: "center",
+            marginBottom: 2,
+            width: "50%",
+          }}
+        >
+          <Box sx={{ marginRight: 4 }}>
+            <Typography
+              variant="h6"
+              sx={{
+                color: muiTheme.palette.text.secondary,
+                marginBottom: 0.5,
+              }}
+            >
+              Release Date
+            </Typography>
+            <Typography
+              variant="h6"
+              sx={{
+                color: muiTheme.palette.text.details,
+                marginBottom: 1.5,
+              }}
+            >
+              {new Date(game.releaseDate).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
+            </Typography>
+          </Box>
+          <Box>
+            <Typography
+              variant="h6"
+              sx={{
+                color: muiTheme.palette.text.secondary,
+                marginBottom: 0.5,
+              }}
+            >
+              Price
+            </Typography>
+            <Typography
+              variant="h6"
+              sx={{
+                color: muiTheme.palette.text.details,
+                marginBottom: 1.5,
+              }}
+            >
+              ${game.price}
+            </Typography>
+          </Box>
+        </Box>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            marginBottom: 2,
+          }}
+        >
+          <Typography
+            variant="h6"
+            sx={{
+              color: muiTheme.palette.text.secondary,
+              marginBottom: 0.5,
+            }}
+          >
+            Released On
+          </Typography>
+          <Box sx={{ display: "flex", gap: 1, marginTop: 1 }}>
+            {game.platformLinks.map((platformLink) => (
+              <IconButton
+                key={platformLink.platform}
+                onClick={() => window.open(platformLink.url, "_blank")}
+              >
+                <img
+                  src={platformLogoMap.get(platformLink.platform)}
+                  alt={platformLink.platform}
+                  style={{ width: 32, height: 32 }}
+                />
+              </IconButton>
+            ))}
+          </Box>
         </Box>
         <Box
           sx={{

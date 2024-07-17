@@ -12,33 +12,7 @@ import { styled } from "@mui/system";
 import GameCard from "../../components/GameCard";
 import muiTheme from "../../themes/muiTheme";
 import { useNavigate } from "react-router-dom";
-
-//Change types location to a combined file.
-export interface IUser {
-  id: string;
-  name: string;
-  email: string;
-  password: string;
-  profileImage: string;
-  socialNetworks: { platform: string; url: string }[];
-  gamesId: string[];
-  birthDate: Date;
-  views: number;
-  refreshTokens: string[];
-}
-
-export interface IGame {
-  id: string;
-  name: string;
-  price: number;
-  image: string;
-  description: string;
-  developerId: string;
-  platformLinks: { platform: string; url: string }[];
-  releaseDate: Date;
-  views: number;
-  categories: string[];
-}
+import { IGame, IUser } from "../../utils/types/types.ts";
 
 const games: IGame[] = [
   {
