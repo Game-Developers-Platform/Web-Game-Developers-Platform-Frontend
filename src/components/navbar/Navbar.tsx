@@ -14,10 +14,11 @@ import MenuItem from "@mui/material/MenuItem";
 import AdbIcon from "@mui/icons-material/Adb";
 import { useNavigate } from "react-router-dom";
 import muiTheme from "../../themes/muiTheme";
+import AddGameModal from "./AddGameModal";
 
 const pages = [
   { title: "My Games", path: "/myGames" },
-  { title: "Add Game", path: "/addGame" },
+  { title: "Add Game", path: "/addGame" }, // Removed link to Add Game page
 ];
 const settings = [
   { title: "Profile", path: "/profile" },
@@ -60,6 +61,7 @@ const Navbar = () => {
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(
     null
   );
+  const [isAddGameModalOpen, setIsAddGameModalOpen] = React.useState(false);
   const navigate = useNavigate();
 
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -80,101 +82,129 @@ const Navbar = () => {
     navigate(path);
   };
 
+  const handleOpenAddGameModal = () => {
+    setIsAddGameModalOpen(true);
+  };
+
+  const handleCloseAddGameModal = () => {
+    setIsAddGameModalOpen(false);
+  };
+
   return (
-    <AppBar
-      position="static"
-      sx={{
-        backgroundColor: muiTheme.palette.secondary.main,
-        color: muiTheme.palette.text.secondary,
-      }}
-    >
-      <Container maxWidth="xl">
-        <Toolbar disableGutters>
-          <NavbarTitle display={{ xs: "none", md: "flex" }} variant="h6" />
+    <>
+      <AppBar
+        position="static"
+        sx={{
+          backgroundColor: muiTheme.palette.secondary.main,
+          color: muiTheme.palette.text.secondary,
+        }}
+      >
+        <Container maxWidth="xl">
+          <Toolbar disableGutters>
+            <NavbarTitle display={{ xs: "none", md: "flex" }} variant="h6" />
 
-          <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
-            <IconButton
-              size="large"
-              aria-label="account of current user"
-              aria-controls="menu-appbar"
-              aria-haspopup="true"
-              onClick={handleOpenNavMenu}
-              color="inherit"
-            >
-              <MenuIcon />
-            </IconButton>
-            <Menu
-              id="menu-appbar"
-              anchorEl={anchorElNav}
-              anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "left",
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "left",
-              }}
-              open={Boolean(anchorElNav)}
-              onClose={handleCloseNavMenu}
-              sx={{
-                display: { xs: "block", md: "none" },
-              }}
-            >
-              {pages.map(({ title, path }) => (
-                <MenuItem key={title} onClick={() => handleCloseNavMenu(path)}>
-                  <Typography textAlign="center">{title}</Typography>
-                </MenuItem>
-              ))}
-            </Menu>
-          </Box>
+            <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
+              <IconButton
+                size="large"
+                aria-label="account of current user"
+                aria-controls="menu-appbar"
+                aria-haspopup="true"
+                onClick={handleOpenNavMenu}
+                color="inherit"
+              >
+                <MenuIcon />
+              </IconButton>
+              <Menu
+                id="menu-appbar"
+                anchorEl={anchorElNav}
+                anchorOrigin={{
+                  vertical: "bottom",
+                  horizontal: "left",
+                }}
+                keepMounted
+                transformOrigin={{
+                  vertical: "top",
+                  horizontal: "left",
+                }}
+                open={Boolean(anchorElNav)}
+                onClose={() => setAnchorElNav(null)}
+                sx={{
+                  display: { xs: "block", md: "none" },
+                }}
+              >
+                {pages.map(({ title, path }) => (
+                  <MenuItem
+                    key={title}
+                    onClick={() => handleCloseNavMenu(path)}
+                  >
+                    <Typography textAlign="center">{title}</Typography>
+                  </MenuItem>
+                ))}
+              </Menu>
+            </Box>
 
-          <NavbarTitle display={{ xs: "flex", md: "none" }} variant="h5" />
+            <NavbarTitle display={{ xs: "flex", md: "none" }} variant="h5" />
 
-          <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
-            {pages.map(({ title, path }) => (
+            <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
               <Button
-                key={title}
-                onClick={() => handleCloseNavMenu(path)}
+                onClick={() => handleCloseNavMenu("/myGames")}
                 sx={{ my: 2, color: "white", display: "block" }}
               >
-                {title}
+                My Games
               </Button>
-            ))}
-          </Box>
 
-          <Box sx={{ flexGrow: 0 }}>
-            <Tooltip title="Open settings">
-              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
-              </IconButton>
-            </Tooltip>
-            <Menu
-              sx={{ mt: "45px" }}
-              id="menu-appbar"
-              anchorEl={anchorElUser}
-              anchorOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
-              open={Boolean(anchorElUser)}
-              onClose={handleCloseUserMenu}
-            >
-              {settings.map(({ title, path }) => (
-                <MenuItem key={title} onClick={() => handleCloseUserMenu(path)}>
-                  <Typography textAlign="center">{title}</Typography>
-                </MenuItem>
-              ))}
-            </Menu>
-          </Box>
-        </Toolbar>
-      </Container>
-    </AppBar>
+              <Button
+                onClick={handleOpenAddGameModal}
+                sx={{ my: 2, color: "white", display: "block" }}
+              >
+                Add Game
+              </Button>
+            </Box>
+
+            <Box sx={{ flexGrow: 0 }}>
+              <Tooltip title="Open settings">
+                <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                  <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+                </IconButton>
+              </Tooltip>
+              <Menu
+                sx={{ mt: "45px" }}
+                id="menu-appbar"
+                anchorEl={anchorElUser}
+                anchorOrigin={{
+                  vertical: "top",
+                  horizontal: "right",
+                }}
+                keepMounted
+                transformOrigin={{
+                  vertical: "top",
+                  horizontal: "right",
+                }}
+                open={Boolean(anchorElUser)}
+                onClose={() => setAnchorElUser(null)}
+              >
+                {settings.map(({ title, path }) => (
+                  <MenuItem
+                    key={title}
+                    onClick={() => handleCloseUserMenu(path)}
+                  >
+                    <Typography textAlign="center">{title}</Typography>
+                  </MenuItem>
+                ))}
+              </Menu>
+            </Box>
+          </Toolbar>
+        </Container>
+      </AppBar>
+
+      {isAddGameModalOpen && (
+        <AddGameModal
+          open={isAddGameModalOpen}
+          onClose={handleCloseAddGameModal}
+          onSubmit={() => {}}
+        />
+      )}
+    </>
   );
 };
 

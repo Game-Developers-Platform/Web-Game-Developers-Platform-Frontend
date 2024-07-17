@@ -10,17 +10,19 @@ import { IGame, IUser } from "../../utils/types/types.ts";
 const GamePage = ({ game, user }: { game: IGame; user: IUser }) => {
   const navigate = useNavigate();
 
+  //TODO - fetch developer details async, To fill developer name and to load developer profile if button pressed.
+
   const isMyGame = game.developerId === user.id;
 
   const handleProfileClick = () => {
     navigate(`/profile/${game.developerId}`);
   };
 
-  //TODO - Change to map between name and logo.
-
   const platformLogoMap = new Map<string, string>([
     ["Steam", steamLogo],
     ["Origin", originLogo],
+    ["EpicGames", epicGamesLogo],
+    ["Xbox", xboxLogo],
   ]);
 
   return (
@@ -198,6 +200,7 @@ const GamePage = ({ game, user }: { game: IGame; user: IUser }) => {
           <Button
             variant="contained"
             sx={{
+              marginTop: "1rem",
               backgroundColor: muiTheme.palette.secondary.main,
               color: muiTheme.palette.text.secondary,
               "&:hover": {
@@ -206,7 +209,7 @@ const GamePage = ({ game, user }: { game: IGame; user: IUser }) => {
             }}
             onClick={handleProfileClick}
           >
-            {isMyGame ? "My Profile" : "Developer Profile"}
+            {isMyGame ? "My Profile" : "Developer's Profile"}
           </Button>
         </Box>
       </Grid>
