@@ -1,18 +1,32 @@
 import { Box, Grid, Typography, Button, IconButton } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import muiTheme from "../../themes/muiTheme";
 import steamLogo from "../../assets/icons/logo-steam.svg";
 import originLogo from "../../assets/icons/logo-origin.svg";
 import epicGamesLogo from "../../assets/icons/logo-epic-games.svg";
 import xboxLogo from "../../assets/icons/logo-xbox.svg";
+import { serverLink } from "../../utils/constants/serverLink.ts";
 import { IGame, IUser } from "../../utils/types/types.ts";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
-const GamePage = ({ game, user }: { game: IGame; user: IUser }) => {
+const GamePage = () => {
   const navigate = useNavigate();
 
-  //TODO - fetch developer details async, To fill developer name and to load developer profile if button pressed.
+  //TODO - Decide how this page gets userId and gameId.
+  const userId = localStorage.getItem("userId");
+  const { gameId } = useParams();
+  const [game, setGame] = useState<IGame>({} as IGame);
 
-  const isMyGame = game.developerId === user.id;
+  useEffect(() => {
+    const fetchGame = async () => {
+      const response = await axios.get(`${serverLink}/games/${gameId}`);
+      setGame(response.data);
+    };
+    fetchGame();
+  }, []);
+
+  const isMyGame = game?.developerId?._id === userId;
 
   const handleProfileClick = () => {
     navigate(`/profile/${game.developerId}`);
@@ -156,7 +170,7 @@ const GamePage = ({ game, user }: { game: IGame; user: IUser }) => {
             Released On
           </Typography>
           <Box sx={{ display: "flex", gap: 1, marginTop: 1 }}>
-            {game.platformLinks.map((platformLink) => (
+            {game?.platformLinks?.map((platformLink) => (
               <IconButton
                 key={platformLink.platform}
                 onClick={() => window.open(platformLink.url, "_blank")}
@@ -195,7 +209,7 @@ const GamePage = ({ game, user }: { game: IGame; user: IUser }) => {
               marginBottom: 1.5,
             }}
           >
-            {user.name}
+            {game.name}
           </Typography>
           <Button
             variant="contained"

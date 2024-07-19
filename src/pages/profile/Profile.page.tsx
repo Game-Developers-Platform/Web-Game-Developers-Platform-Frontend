@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Avatar,
   Box,
@@ -11,44 +11,28 @@ import {
 import { styled } from "@mui/system";
 import GameCard from "../../components/GameCard";
 import muiTheme from "../../themes/muiTheme";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { IGame, IUser } from "../../utils/types/types.ts";
+import { serverLink } from "../../utils/constants/serverLink.ts";
+import axios from "axios";
 
-const games: IGame[] = [
-  {
-    id: "1",
-    name: "Horizon Zero Dawn",
-    price: 59.99,
-    image:
-      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1151640/header.jpg?t=1717621265",
-    description:
-      "Experience Aloy’s legendary quest to unravel the mysteries of a future Earth ruled by Machines. Use devastating tactical attacks against your prey and explore a majestic open world in this award-winning action RPG!",
-    developerId: "1",
-    platformLinks: [],
-    releaseDate: new Date("2017-02-28"),
-    views: 500,
-    categories: [],
-  },
-  {
-    id: "2",
-    name: "Chained Together",
-    price: 29.99,
-    image:
-      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2567870/header.jpg?t=1719621610",
-    description:
-      "From the depths of hell, climb chained to your friends through diverse worlds. Solo or co-op, try to reach the summit and discover what awaits you there...",
-    developerId: "1",
-    platformLinks: [],
-    releaseDate: new Date("2022-01-01"),
-    views: 1000,
-    categories: [],
-  },
-];
+const ProfilePage = () => {
+  //TODO - Decide how this page gets userId.
+  const { userId } = useParams();
+  const [user, setUser] = useState<IUser>({} as IUser);
 
-//TODO - add check between connected user and profilePage User id.
-const ProfilePage = ({ user }: { user: IUser }) => {
+  const currentUserId = localStorage.getItem("userId");
+  const isOwnProfile = user._id === currentUserId;
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const response = await axios.get(`${serverLink}/users/${userId}`);
+      setUser(response.data);
+    };
+    fetchUser();
+  }, []);
+
   const [isEditModalOpen, setEditModalOpen] = useState(false);
-  const isOwnProfile = user.id === user.id;
 
   const navigate = useNavigate();
 
@@ -110,120 +94,124 @@ const ProfilePage = ({ user }: { user: IUser }) => {
     return age;
   };
 
-  const userGames = games.filter((game) => user.gamesId.includes(game.id));
-  const sortedGames = [...userGames].sort((a, b) => b.views - a.views);
+  console.log("user", user);
 
   return (
-    <ProfileContainer>
-      <Typography
-        sx={{ color: muiTheme.palette.text.secondary }}
-        variant="h4"
-        component="h1"
-        align="center"
-      >
-        {user.name}
-      </Typography>
-      <Avatar
-        src={user.profileImage}
-        alt={user.name}
-        sx={{ width: 150, height: 150 }}
-      />
-      <ProfileDetails>
+    user && (
+      <ProfileContainer>
         <Typography
           sx={{ color: muiTheme.palette.text.secondary }}
-          variant="body1"
+          variant="h4"
+          component="h1"
+          align="center"
         >
-          Age: {calculateAge(user.birthDate)}
+          {user.name}
         </Typography>
-        <Typography
-          sx={{ color: muiTheme.palette.text.secondary }}
-          variant="body1"
-        >
-          Birthdate: {user.birthDate.toDateString()}
-        </Typography>
-        <Typography
-          sx={{ color: muiTheme.palette.text.secondary }}
-          variant="body1"
-        >
-          Games Published: {user.gamesId.length}
-        </Typography>
-        <Button
-          sx={{ color: muiTheme.palette.text.secondary }}
-          onClick={() => navigate("/myGames")}
-          variant="contained"
-          color="primary"
-        >
-          {isOwnProfile ? "My Games" : `${user.name}'s Games`}
-        </Button>
-        {isOwnProfile && (
-          <Button
-            sx={{ color: muiTheme.palette.text.secondary }}
-            variant="contained"
-            color="primary"
-            onClick={handleOpenEditModal}
-          >
-            Edit Profile
-          </Button>
-        )}
-      </ProfileDetails>
-
-      <Typography
-        sx={{ color: muiTheme.palette.text.secondary, marginTop: 2 }}
-        variant="h5"
-        component="h2"
-        align="center"
-      >
-        {isOwnProfile
-          ? "Your Most Viewed Games"
-          : `${user.name}'s Most Viewed Games`}
-      </Typography>
-
-      <GamesGrid container spacing={2}>
-        {sortedGames.map((game) => (
-          <Grid item xs={12} sm={6} md={4} lg={3} key={game.id}>
-            <GameCard {...game} />
-          </Grid>
-        ))}
-      </GamesGrid>
-
-      <EditModal open={isEditModalOpen} onClose={handleCloseEditModal}>
-        <ModalContent sx={{ backgroundColor: muiTheme.palette.primary.main }}>
+        <Avatar
+          src={user.profileImage}
+          alt={user.name}
+          sx={{ width: 150, height: 150 }}
+        />
+        <ProfileDetails>
           <Typography
             sx={{ color: muiTheme.palette.text.secondary }}
-            variant="h6"
-            component="h2"
+            variant="body1"
           >
-            Edit Profile
+            Age: {calculateAge(user.birthDate)}
           </Typography>
-          <CustomTextField label="Name" defaultValue={user.name} fullWidth />
-          <CustomTextField
-            label="Profile Image URL"
-            defaultValue={user.profileImage}
-            fullWidth
-          />
-          <CustomTextField
-            label="Birthdate"
-            type="date"
-            defaultValue={user.birthDate.toISOString().split("T")[0]}
-            fullWidth
-          />
+          <Typography
+            sx={{ color: muiTheme.palette.text.secondary }}
+            variant="body1"
+          >
+            Birthdate: {new Date(user.birthDate).toDateString()}
+          </Typography>
+          <Typography
+            sx={{ color: muiTheme.palette.text.secondary }}
+            variant="body1"
+          >
+            Games Published: {user.gamesId?.length}
+          </Typography>
           <Button
+            sx={{ color: muiTheme.palette.text.secondary }}
+            onClick={() => navigate("/myGames")}
             variant="contained"
             color="primary"
-            onClick={handleCloseEditModal}
-            sx={{
-              backgroundColor: muiTheme.palette.background.default,
-              color: muiTheme.palette.secondary.main,
-              "&:hover": {
-                backgroundColor: muiTheme.palette.text.hover, // Change to your desired hover background color
-              },
-            }}
           >
-            Save
+            {isOwnProfile ? "My Games" : `${user.name}'s Games`}
           </Button>
-        </ModalContent>
-      </EditModal>
-    </ProfileContainer>
+          {isOwnProfile && (
+            <Button
+              sx={{ color: muiTheme.palette.text.secondary }}
+              variant="contained"
+              color="primary"
+              onClick={handleOpenEditModal}
+            >
+              Edit Profile
+            </Button>
+          )}
+        </ProfileDetails>
+
+        <Typography
+          sx={{ color: muiTheme.palette.text.secondary, marginTop: 2 }}
+          variant="h5"
+          component="h2"
+          align="center"
+        >
+          {isOwnProfile
+            ? "Your Most Viewed Games"
+            : `${user.name}'s Most Viewed Games`}
+        </Typography>
+
+        <GamesGrid container spacing={2}>
+          {user.gamesId?.map((game: IGame) => {
+            console.log("Game:", game);
+            return (
+              <Grid item xs={12} sm={6} md={4} lg={3} key={game._id}>
+                <GameCard {...game} />
+              </Grid>
+            );
+          })}
+        </GamesGrid>
+
+        <EditModal open={isEditModalOpen} onClose={handleCloseEditModal}>
+          <ModalContent sx={{ backgroundColor: muiTheme.palette.primary.main }}>
+            <Typography
+              sx={{ color: muiTheme.palette.text.secondary }}
+              variant="h6"
+              component="h2"
+            >
+              Edit Profile
+            </Typography>
+            <CustomTextField label="Name" defaultValue={user.name} fullWidth />
+            <CustomTextField
+              label="Profile Image URL"
+              defaultValue={user.profileImage}
+              fullWidth
+            />
+            <CustomTextField
+              label="Birthdate"
+              type="date"
+              defaultValue={new Date(user.birthDate)}
+              fullWidth
+            />
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleCloseEditModal}
+              sx={{
+                backgroundColor: muiTheme.palette.background.default,
+                color: muiTheme.palette.secondary.main,
+                "&:hover": {
+                  backgroundColor: muiTheme.palette.text.hover, // Change to your desired hover background color
+                },
+              }}
+            >
+              Save
+            </Button>
+          </ModalContent>
+        </EditModal>
+      </ProfileContainer>
+    )
   );
 };
 

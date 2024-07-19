@@ -11,54 +11,20 @@ import GamePage from "./pages/games/Game.page";
 import PrivateRoutes from "./pages/privateRoutes/PrivateRoutes.page";
 import Navbar from "./components/navbar/Navbar";
 import Footer from "./components/footer/Footer";
-import { IGame } from "./utils/types/types.ts";
-
-const currentUser = {
-  id: "1",
-  name: "Lior Hassin",
-  email: "liorhassin3@gmail.com",
-  password: "",
-  profileImage: "https://avatar.iran.liara.run/public/22",
-  birthDate: new Date("1994-01-01"),
-  gamesId: ["1", "2"],
-  views: 0,
-  refreshTokens: [],
-  socialNetworks: [],
-};
-
-const exampleGame: IGame = {
-  id: "1",
-  name: "Terraria",
-  price: 9.99,
-  image:
-    "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/105600/header.jpg?t=1666290860",
-  description:
-    "Dig, fight, explore, build! Nothing is impossible in this action-packed adventure game. Four Pack also available!",
-  developerId: "3",
-  platformLinks: [
-    {
-      platform: "Steam",
-      url: "https://store.steampowered.com/app/105600/Terraria/",
-    },
-  ],
-  releaseDate: new Date("2011-05-16"),
-  views: 58,
-  categories: ["Action", "Adventure"],
-};
 
 const router = [
   { path: "/signIn", component: SignInPage, isPrivate: false },
   { path: "/signUp", component: SignUpPage, isPrivate: false },
   { path: "/", component: HomePage, isPrivate: true },
   {
-    path: "/profile",
-    component: () => <ProfilePage user={currentUser} />,
+    path: "/profile/:userId",
+    component: ProfilePage,
     isPrivate: true,
   },
-  { path: "/myGames", component: MyGamesPage, isPrivate: true },
+  { path: "/myGames/:userId", component: MyGamesPage, isPrivate: true },
   {
-    path: "/game",
-    component: () => <GamePage game={exampleGame} user={currentUser} />,
+    path: "/game/:gameId",
+    component: GamePage,
     isPrivate: true,
   },
 ];

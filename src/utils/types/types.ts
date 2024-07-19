@@ -1,10 +1,10 @@
 export interface IGame {
-  id: string;
+  _id: string;
   name: string;
   price: number;
   image: string;
   description: string;
-  developerId: string;
+  developerId: IUser;
   platformLinks: { platform: string; url: string }[];
   releaseDate: Date;
   views: number;
@@ -12,13 +12,13 @@ export interface IGame {
 }
 
 export interface IUser {
-  id: string;
+  _id: string;
   name: string;
   email: string;
   password: string;
   profileImage: string;
   socialNetworks: { platform: string; url: string }[];
-  gamesId: string[];
+  gamesId: IGame[];
   birthDate: Date;
   views: number;
   refreshTokens: string[];

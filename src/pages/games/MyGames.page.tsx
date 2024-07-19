@@ -21,6 +21,7 @@ const defaultGameCardData = [
       "Experience Aloy’s legendary quest to unravel the mysteries of a future Earth ruled by Machines. Use devastating tactical attacks against your prey and explore a majestic open world in this award-winning action RPG!",
     categories: ["Action", "Adventure"],
     id: "1",
+    developerId: "test",
   },
   {
     image:
@@ -30,6 +31,7 @@ const defaultGameCardData = [
       "From the depths of hell, climb chained to your friends through diverse worlds. Solo or co-op, try to reach the summit and discover what awaits you there...",
     categories: ["Adventure"],
     id: "2",
+    developerId: "test",
   },
   {
     image:
@@ -39,6 +41,7 @@ const defaultGameCardData = [
       "Dig, fight, explore, build! Nothing is impossible in this action-packed adventure game. Four Pack also available!",
     categories: ["Action", "Adventure"],
     id: "3",
+    developerId: "test",
   },
   {
     image:
@@ -48,6 +51,7 @@ const defaultGameCardData = [
       "For over two decades, Counter-Strike has offered an elite competitive experience, one shaped by millions of players from across the globe. And now the next chapter in the CS story is about to begin. This is Counter-Strike 2.",
     categories: ["Action"],
     id: "4",
+    developerId: "test",
   },
 ];
 

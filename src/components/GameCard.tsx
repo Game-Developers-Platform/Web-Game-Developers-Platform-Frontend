@@ -6,22 +6,26 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import { useNavigate } from "react-router-dom";
 import muiTheme from "../themes/muiTheme";
+import { IUser } from "../utils/types/types";
 
 const GameCard = ({
   image,
   name,
   description,
-  id,
+  _id,
+  developerId,
 }: {
   image: string;
   name: string;
   description: string;
-  id: string;
+  _id: string;
+  developerId: IUser;
 }) => {
+  console.log(image, name, description, _id, developerId);
   const navigate = useNavigate();
 
   const truncateText = (text: string, maxLength: number) => {
-    if (text.length > maxLength) {
+    if (text?.length > maxLength) {
       return text.slice(0, maxLength) + "...";
     } else {
       return text;
@@ -30,7 +34,7 @@ const GameCard = ({
 
   return (
     <Card
-      key={id}
+      key={_id}
       sx={{
         maxWidth: 345,
         maxHeight: 345,
@@ -39,7 +43,12 @@ const GameCard = ({
         backgroundColor: muiTheme.palette.background.default,
       }}
     >
-      <CardMedia sx={{ height: 140 }} image={image} title={name} />
+      <CardMedia
+        component={"img"}
+        sx={{ height: 140 }}
+        image={image}
+        title={name}
+      />
       <CardContent
         sx={{
           flex: 1,
@@ -68,14 +77,14 @@ const GameCard = ({
         <Button
           sx={{ color: muiTheme.palette.text.button }}
           size="small"
-          onClick={() => navigate("/game")}
+          onClick={() => navigate(`/game/${_id}`)}
         >
           Game Page
         </Button>
         <Button
           sx={{ color: muiTheme.palette.text.button }}
           size="small"
-          onClick={() => navigate("/profile")}
+          onClick={() => navigate(`/profile/${developerId._id}`)}
         >
           Developer Page
         </Button>

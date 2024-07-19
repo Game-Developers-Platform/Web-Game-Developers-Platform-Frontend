@@ -46,6 +46,8 @@ const NavbarTitle = ({ display, variant }: NavbarTitleProps) => (
 );
 
 const Navbar = () => {
+  const userId = localStorage.getItem("userId");
+
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
     null
   );
@@ -100,7 +102,7 @@ const Navbar = () => {
     },
   ];
   const settings = [
-    { title: "Profile", path: "/profile" },
+    { title: "Profile", path: `/profile/${userId}` },
     { title: "Logout", path: "/signIn" },
   ];
 
@@ -157,14 +159,16 @@ const Navbar = () => {
             <NavbarTitle display={{ xs: "flex", md: "none" }} variant="h5" />
 
             <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
-              {pages.map(({ title, onClick }) => (
-                <Button
-                  onClick={() => onClick()}
-                  sx={{ my: 2, color: "white", display: "block" }}
-                >
-                  {title}
-                </Button>
-              ))}
+              {React.Children.toArray(
+                pages.map(({ title, onClick }) => (
+                  <Button
+                    onClick={() => onClick()}
+                    sx={{ my: 2, color: "white", display: "block" }}
+                  >
+                    {title}
+                  </Button>
+                ))
+              )}
             </Box>
 
             <Box sx={{ flexGrow: 0 }}>
