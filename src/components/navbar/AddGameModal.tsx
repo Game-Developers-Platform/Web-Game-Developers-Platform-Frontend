@@ -212,6 +212,7 @@ const AddGameModal = ({ open, onClose, onSubmit }: AddGameModalProps) => {
                   justifyContent: "left",
                   backgroundColor: muiTheme.palette.primary.main,
                   color: muiTheme.palette.text.secondary,
+                  height: "11rem",
                 },
               },
             },
@@ -255,6 +256,7 @@ const AddGameModal = ({ open, onClose, onSubmit }: AddGameModalProps) => {
                 style: {
                   backgroundColor: muiTheme.palette.primary.main,
                   color: muiTheme.palette.text.secondary,
+                  height: "7rem",
                 },
               },
             },

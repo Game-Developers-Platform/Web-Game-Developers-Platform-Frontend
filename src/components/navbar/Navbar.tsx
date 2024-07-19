@@ -16,15 +16,6 @@ import { useNavigate } from "react-router-dom";
 import muiTheme from "../../themes/muiTheme";
 import AddGameModal from "./AddGameModal";
 
-const pages = [
-  { title: "My Games", path: "/myGames" },
-  { title: "Add Game", path: "/addGame" }, // Removed link to Add Game page
-];
-const settings = [
-  { title: "Profile", path: "/profile" },
-  { title: "Logout", path: "/signIn" },
-];
-
 interface NavbarTitleProps {
   display: { xs: string; md: string };
   variant: "h6" | "h5" | "h4" | "h3" | "h2" | "h1";
@@ -72,9 +63,8 @@ const Navbar = () => {
     setAnchorElUser(event.currentTarget);
   };
 
-  const handleCloseNavMenu = (path: string) => {
+  const handleCloseNavMenu = () => {
     setAnchorElNav(null);
-    navigate(path);
   };
 
   const handleCloseUserMenu = (path: string) => {
@@ -89,6 +79,30 @@ const Navbar = () => {
   const handleCloseAddGameModal = () => {
     setIsAddGameModalOpen(false);
   };
+
+  const pages = [
+    {
+      title: "My Games",
+      path: "/myGames",
+      onClick: () => {
+        navigate("/myGames");
+        handleCloseNavMenu();
+      },
+    },
+    {
+      title: "Add Game",
+      path: "/addGame",
+      onClick: () => {
+        console.log("test");
+        handleOpenAddGameModal();
+        handleCloseNavMenu();
+      },
+    },
+  ];
+  const settings = [
+    { title: "Profile", path: "/profile" },
+    { title: "Logout", path: "/signIn" },
+  ];
 
   return (
     <>
@@ -132,11 +146,8 @@ const Navbar = () => {
                   display: { xs: "block", md: "none" },
                 }}
               >
-                {pages.map(({ title, path }) => (
-                  <MenuItem
-                    key={title}
-                    onClick={() => handleCloseNavMenu(path)}
-                  >
+                {pages.map(({ title, onClick }) => (
+                  <MenuItem key={title} onClick={() => onClick()}>
                     <Typography textAlign="center">{title}</Typography>
                   </MenuItem>
                 ))}
@@ -146,19 +157,14 @@ const Navbar = () => {
             <NavbarTitle display={{ xs: "flex", md: "none" }} variant="h5" />
 
             <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
-              <Button
-                onClick={() => handleCloseNavMenu("/myGames")}
-                sx={{ my: 2, color: "white", display: "block" }}
-              >
-                My Games
-              </Button>
-
-              <Button
-                onClick={handleOpenAddGameModal}
-                sx={{ my: 2, color: "white", display: "block" }}
-              >
-                Add Game
-              </Button>
+              {pages.map(({ title, onClick }) => (
+                <Button
+                  onClick={() => onClick()}
+                  sx={{ my: 2, color: "white", display: "block" }}
+                >
+                  {title}
+                </Button>
+              ))}
             </Box>
 
             <Box sx={{ flexGrow: 0 }}>
@@ -186,7 +192,9 @@ const Navbar = () => {
                 {settings.map(({ title, path }) => (
                   <MenuItem
                     key={title}
-                    onClick={() => handleCloseUserMenu(path)}
+                    onClick={() => {
+                      handleCloseUserMenu(path);
+                    }}
                   >
                     <Typography textAlign="center">{title}</Typography>
                   </MenuItem>
