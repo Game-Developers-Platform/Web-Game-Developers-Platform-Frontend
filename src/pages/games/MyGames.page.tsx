@@ -12,6 +12,9 @@ import { Clear as ClearIcon } from "@mui/icons-material";
 import GameCard from "../../components/GameCard";
 import muiTheme from "../../themes/muiTheme";
 
+//TODO - Fetch specific user games and load them.
+//TODO - Decide how this page gets userId(param).
+
 const defaultGameCardData = [
   {
     image:
