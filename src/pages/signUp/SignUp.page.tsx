@@ -38,6 +38,10 @@ export type SignUpType = {
   socialNetworks: { platform: string; url: string }[];
 };
 
+const CustomIconButton = styled(IconButton)(() => ({
+  color: muiTheme.palette.text.secondary,
+}));
+
 const CustomTextField = styled(TextField)(({ theme }) => ({
   "& .MuiInputBase-root": {
     color: muiTheme.palette.text.secondary,
@@ -286,9 +290,9 @@ const SignUpPage = () => {
                           </div>
                         }
                       >
-                        <IconButton>
+                        <CustomIconButton>
                           <HelpOutlineIcon />
-                        </IconButton>
+                        </CustomIconButton>
                       </Tooltip>
                     ),
                   }}
@@ -321,9 +325,9 @@ const SignUpPage = () => {
                           </div>
                         }
                       >
-                        <IconButton>
+                        <CustomIconButton>
                           <HelpOutlineIcon />
-                        </IconButton>
+                        </CustomIconButton>
                       </Tooltip>
                     ),
                   }}
@@ -358,9 +362,9 @@ const SignUpPage = () => {
                           </div>
                         }
                       >
-                        <IconButton>
+                        <CustomIconButton>
                           <HelpOutlineIcon />
-                        </IconButton>
+                        </CustomIconButton>
                       </Tooltip>
                     ),
                   }}
@@ -392,9 +396,9 @@ const SignUpPage = () => {
                           </div>
                         }
                       >
-                        <IconButton>
+                        <CustomIconButton>
                           <HelpOutlineIcon />
-                        </IconButton>
+                        </CustomIconButton>
                       </Tooltip>
                     ),
                   }}
