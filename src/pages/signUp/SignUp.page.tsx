@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import {
   Avatar,
@@ -13,9 +13,21 @@ import {
   ThemeProvider,
   IconButton,
   Tooltip,
+  MenuItem,
 } from "@mui/material/";
 import muiTheme from "../../themes/muiTheme";
 import { HelpOutline as HelpOutlineIcon } from "@mui/icons-material";
+import { styled } from "@mui/system";
+import {
+  validateBirthdate,
+  validateConfirmPassword,
+  validateEmail,
+  validateName,
+  validatePassword,
+  validateUrl,
+} from "../../utils/validations/validations";
+import { supportedSocialNetworks } from "../../utils/constants/supportedOptions";
+import { getPlatformRegex } from "../../utils/constants/regex";
 
 export type SignUpType = {
   name: string;
@@ -23,7 +35,21 @@ export type SignUpType = {
   password: string;
   confirmPassword: string;
   birthdate: string;
+  socialNetworks: { platform: string; url: string }[];
 };
+
+const CustomTextField = styled(TextField)(({ theme }) => ({
+  "& .MuiInputBase-root": {
+    color: muiTheme.palette.text.secondary,
+  },
+  "& .MuiInputLabel-root": {
+    color: muiTheme.palette.text.secondary,
+  },
+  "& .MuiOutlinedInput-root": {
+    borderRadius: theme.shape.borderRadius,
+    marginTop: 0,
+  },
+}));
 
 const customTheme = createTheme({
   components: {
@@ -67,7 +93,7 @@ const customTheme = createTheme({
           color: muiTheme.palette.text.primary,
           borderRadius: "4px",
           padding: "8px",
-          maxWidth: "200px", // Adjust width if necessary
+          maxWidth: "200px",
         },
       },
     },
@@ -82,6 +108,7 @@ const SignUpPage = () => {
     password: "",
     confirmPassword: "",
     birthdate: "",
+    socialNetworks: [],
   });
   const [errors, setErrors] = useState({
     name: "",
@@ -89,57 +116,21 @@ const SignUpPage = () => {
     password: "",
     confirmPassword: "",
     birthdate: "",
+    socialNetworks: [] as { platform: string; urlError: string }[],
   });
 
-  const validateName = (name: string) => {
-    const nameRegex = /^(?!^\s|\s$)[A-Za-z0-9\s]{2,30}$/;
-    return nameRegex.test(name)
-      ? ""
-      : "Name must be between 2 and 30 characters long and contain only letters, numbers, and spaces.";
-  };
-
-  const validateEmail = (email: string) => {
-    const emailRegex = /^[^\s@]{3,55}@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email)
-      ? ""
-      : "Email must be between 3 and 55 characters long and in a valid format.";
-  };
-
-  const validatePassword = (password: string) => {
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\W).{6,}$/;
-    return passwordRegex.test(password)
-      ? ""
-      : "Password must be at least 6 characters long and include at least one uppercase letter, one lowercase letter, and one special character.";
-  };
-
-  const validateConfirmPassword = (
-    confirmPassword: string,
-    password: string
-  ) => {
-    return confirmPassword === password ? "" : "Passwords do not match.";
-  };
-
-  const validateBirthdate = (birthdate: string) => {
-    const today = new Date();
-    const birthDate = new Date(birthdate);
-
-    if (isNaN(birthDate.getTime())) {
-      return "Invalid date.";
-    }
-
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    const dayDiff = today.getDate() - birthDate.getDate();
-
-    if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
-      age--;
-    }
-
-    return age >= 16 ? "" : "You must be at least 16 years old.";
-  };
+  const [platformLinks, setPlatformLinks] = React.useState<
+    { platform: string; url: string }[]
+  >([]);
+  const [selectedPlatform, setSelectedPlatform] = React.useState<string>("");
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    const filteredPlatforms = platformLinks.filter(
+      (platform) => platform.url !== ""
+    );
+
     const newErrors = {
       name: validateName(formData.name),
       email: validateEmail(formData.email),
@@ -149,15 +140,30 @@ const SignUpPage = () => {
         formData.password
       ),
       birthdate: validateBirthdate(formData.birthdate),
+      socialNetworks: filteredPlatforms.map(({ platform, url }) => ({
+        platform,
+        urlError: validateUrl(url, getPlatformRegex(platform), platform),
+      })),
     };
 
-    if (Object.values(newErrors).every((error) => error === "")) {
+    const hasErrors =
+      [
+        newErrors.name,
+        newErrors.email,
+        newErrors.password,
+        newErrors.confirmPassword,
+        newErrors.birthdate,
+      ].some((error) => error !== "") ||
+      newErrors.socialNetworks.some(({ urlError }) => urlError !== "");
+
+    if (!hasErrors) {
       setFormData({
         name: "",
         email: "",
         password: "",
         confirmPassword: "",
         birthdate: "",
+        socialNetworks: filteredPlatforms,
       });
     } else {
       setErrors(newErrors);
@@ -169,12 +175,54 @@ const SignUpPage = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handlePlatformChange = (
+    event: React.ChangeEvent<{ value: unknown }>
+  ) => {
+    const platformName = event.target.value as string;
+    setSelectedPlatform(platformName);
+    if (!platformLinks.find((platform) => platform.platform === platformName)) {
+      setPlatformLinks((prevPlatforms) => [
+        ...prevPlatforms,
+        { platform: platformName, url: "" },
+      ]);
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        socialNetworks: [
+          ...prevErrors.socialNetworks,
+          { platform: platformName, urlError: "" },
+        ],
+      }));
+    }
+  };
+
+  const handlePlatformUrlChange = (index: number, url: string) => {
+    setPlatformLinks((prevPlatforms) => {
+      const updatedPlatforms = [...prevPlatforms];
+      updatedPlatforms[index].url = url;
+
+      const newErrors = [...errors.socialNetworks];
+      newErrors[index].urlError = validateUrl(
+        url,
+        getPlatformRegex(selectedPlatform),
+        selectedPlatform
+      );
+      setErrors((prevErrors) => ({ ...prevErrors, socialNetworks: newErrors }));
+
+      if (url === "") {
+        updatedPlatforms.splice(index, 1);
+        newErrors.splice(index, 1);
+      }
+
+      return updatedPlatforms;
+    });
+  };
+
   return (
     <ThemeProvider theme={customTheme}>
       <Container component="main" maxWidth="xs">
         <Box
           sx={{
-            marginTop: 8,
+            marginTop: 2,
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
@@ -183,7 +231,7 @@ const SignUpPage = () => {
           <Typography
             component="h1"
             variant="h5"
-            sx={{ color: muiTheme.palette.text.secondary, mb: 2 }}
+            sx={{ color: muiTheme.palette.text.secondary, mb: 1 }}
           >
             Sign Up
           </Typography>
@@ -194,7 +242,7 @@ const SignUpPage = () => {
               p: 0,
             }}
             onClick={() => {
-              // Handle Avatar click (if needed)
+              //TODO - Handle Icon Selector
             }}
           >
             <Avatar
@@ -206,7 +254,7 @@ const SignUpPage = () => {
             component="form"
             noValidate
             onSubmit={handleSubmit}
-            sx={{ mt: 3 }}
+            sx={{ mt: 2 }}
           >
             <Grid container spacing={2} alignItems="center">
               <Grid item xs={12}>
@@ -368,20 +416,68 @@ const SignUpPage = () => {
                 />
               </Grid>
             </Grid>
+            <CustomTextField
+              select
+              label="Social Network"
+              value={selectedPlatform}
+              onChange={handlePlatformChange}
+              fullWidth
+              margin="normal"
+              variant="outlined"
+              SelectProps={{
+                displayEmpty: true,
+                MenuProps: {
+                  PaperProps: {
+                    style: {
+                      backgroundColor: muiTheme.palette.primary.main,
+                      color: muiTheme.palette.text.secondary,
+                      height: "7rem",
+                    },
+                  },
+                },
+              }}
+              InputLabelProps={{
+                style: { color: muiTheme.palette.text.secondary },
+              }}
+            >
+              {supportedSocialNetworks.map((socialNetwork) => (
+                <MenuItem key={socialNetwork} value={socialNetwork}>
+                  {socialNetwork}
+                </MenuItem>
+              ))}
+            </CustomTextField>
+            {platformLinks.map(
+              (platform, index) =>
+                platform.platform === selectedPlatform && (
+                  <CustomTextField
+                    key={index}
+                    label={`${platform.platform} URL`}
+                    value={platform.url}
+                    onChange={(e) =>
+                      handlePlatformUrlChange(index, e.target.value)
+                    }
+                    fullWidth
+                    margin="normal"
+                    variant="outlined"
+                    error={Boolean(errors.socialNetworks[index]?.urlError)}
+                    helperText={errors.socialNetworks[index]?.urlError}
+                  />
+                )
+            )}
             <Button
               type="submit"
               fullWidth
               variant="contained"
               sx={{
                 backgroundColor: theme.palette.background.default,
-                mt: 3,
+                mt: 2,
                 mb: 2,
               }}
             >
               Sign Up
             </Button>
             <Grid container justifyContent="flex-start">
-              <Grid item>
+              <Grid item sx={{ marginBottom: 2 }}>
                 <NavLink
                   style={{ color: theme.palette.text.hover }}
                   to="/signin"

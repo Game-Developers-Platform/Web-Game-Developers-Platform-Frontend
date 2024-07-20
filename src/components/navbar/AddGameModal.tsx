@@ -57,6 +57,7 @@ const AddGameModal = ({ open, onClose, onSubmit }: AddGameModalProps) => {
   >([]);
   const [selectedPlatform, setSelectedPlatform] = React.useState<string>("");
 
+  //TODO - change to fetch supported categories and platforms from constant files.
   const supportedCategories = [
     "Action",
     "Adventure",
@@ -225,7 +226,7 @@ const AddGameModal = ({ open, onClose, onSubmit }: AddGameModalProps) => {
             <MenuItem
               key={category}
               value={category}
-              style={{ padding: "8px 16px" }} // Adjust padding as needed
+              style={{ padding: "8px 16px" }}
             >
               <Checkbox
                 checked={categories.includes(category)}
