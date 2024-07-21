@@ -32,12 +32,10 @@ import {
 import { supportedSocialNetworks } from "../../utils/constants/supportedOptions";
 import { getPlatformRegex } from "../../utils/constants/regex";
 import axios from "axios";
-import {
-  authLink,
-  serverLink,
-  uploadFileLink,
-} from "../../utils/constants/serverLink";
+import { authLink, uploadFileLink } from "../../utils/constants/serverLink";
 import { usePost } from "../../hooks/usePost";
+import { useIsAuthenticated } from "../../store/store";
+import useAuthenticated from "../../hooks/useAuthenticated";
 
 export type SignUpType = {
   profileImage: string;
@@ -122,6 +120,12 @@ const SignUpPage = () => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
 
+  useAuthenticated();
+
+  const setIsAuthenticated = useIsAuthenticated(
+    (state) => state.setIsAuthenticated
+  );
+
   const [formData, setFormData] = useState<SignUpType>({
     profileImage: "",
     name: "",
@@ -179,15 +183,23 @@ const SignUpPage = () => {
 
     if (!hasErrors) {
       try {
-        const uploadResponse = await axios.post(`${uploadFileLink}`, formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
+        const imageData = new FormData();
+        imageData.append("file", fileName as Blob);
+        const uploadResponse = await axios.post(
+          `${uploadFileLink}`,
+          imageData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+
+        console.log(uploadResponse.data.file);
 
         setFormData((prev) => ({
           ...prev,
-          profileImage: uploadResponse.data.file,
+          profileImage: uploadResponse.data.file.path,
         }));
 
         await usePost(`${authLink}/register`, formData)
@@ -205,6 +217,7 @@ const SignUpPage = () => {
             localStorage.setItem("token", token);
             localStorage.setItem("refreshToken", refreshToken);
             localStorage.setItem("userId", userId);
+            setIsAuthenticated(true);
             window.location.href = "http://localhost:5173";
           })
           .catch((error) => {

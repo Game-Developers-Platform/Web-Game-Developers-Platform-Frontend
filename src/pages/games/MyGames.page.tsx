@@ -1,4 +1,4 @@
-import { useState, ChangeEvent } from "react";
+import { useState, ChangeEvent, useEffect } from "react";
 import {
   Box,
   Grid,
@@ -11,52 +11,10 @@ import {
 import { Clear as ClearIcon } from "@mui/icons-material";
 import GameCard from "../../components/GameCard";
 import muiTheme from "../../themes/muiTheme";
-
-//TODO - Fetch specific user games and load them.
-//TODO - Decide how this page gets userId(param).
-
-const defaultGameCardData = [
-  {
-    image:
-      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1151640/header.jpg?t=1717621265",
-    name: "Horizon Zero Dawn",
-    description:
-      "Experience Aloy’s legendary quest to unravel the mysteries of a future Earth ruled by Machines. Use devastating tactical attacks against your prey and explore a majestic open world in this award-winning action RPG!",
-    categories: ["Action", "Adventure"],
-    id: "1",
-    developerId: "test",
-  },
-  {
-    image:
-      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2567870/header.jpg?t=1719621610",
-    name: "Chained Together",
-    description:
-      "From the depths of hell, climb chained to your friends through diverse worlds. Solo or co-op, try to reach the summit and discover what awaits you there...",
-    categories: ["Adventure"],
-    id: "2",
-    developerId: "test",
-  },
-  {
-    image:
-      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/105600/header.jpg?t=1666290860",
-    name: "Terraria",
-    description:
-      "Dig, fight, explore, build! Nothing is impossible in this action-packed adventure game. Four Pack also available!",
-    categories: ["Action", "Adventure"],
-    id: "3",
-    developerId: "test",
-  },
-  {
-    image:
-      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/730/header.jpg?t=1719426374",
-    name: "Counter Strike 2",
-    description:
-      "For over two decades, Counter-Strike has offered an elite competitive experience, one shaped by millions of players from across the globe. And now the next chapter in the CS story is about to begin. This is Counter-Strike 2.",
-    categories: ["Action"],
-    id: "4",
-    developerId: "test",
-  },
-];
+import { useParams } from "react-router-dom";
+import { serverLink } from "../../utils/constants/serverLink";
+import axios from "axios";
+import { IGame } from "../../utils/types/types";
 
 const FlexedBox = styled(Box)(({ theme }) => ({
   display: "flex",
@@ -67,6 +25,21 @@ const FlexedBox = styled(Box)(({ theme }) => ({
 
 const MyGamesPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const { userId } = useParams();
+  const [games, setGames] = useState<IGame[]>([]);
+  const connectedUser = localStorage.getItem("userId");
+
+  const isOwnProfile = userId === connectedUser;
+
+  useEffect(() => {
+    const fetchGames = async () => {
+      const response = await axios.get(
+        `${serverLink}/games/developer/${userId}`
+      );
+      setGames(response.data);
+    };
+    fetchGames();
+  }, []);
 
   const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
@@ -76,11 +49,9 @@ const MyGamesPage = () => {
     setSearchTerm("");
   };
 
-  const filteredGames = defaultGameCardData.filter((game) => {
+  const filteredGames = games.filter((game) => {
     return game.name.toLowerCase().includes(searchTerm.toLowerCase());
   });
-
-  const isOwnProfile = true;
 
   return (
     <Box sx={{ flexGrow: 1, padding: 2 }}>
@@ -155,7 +126,7 @@ const MyGamesPage = () => {
               md={4}
               lg={4}
               item
-              key={gameData.id}
+              key={gameData._id}
               sx={{ display: "flex", justifyContent: "center" }}
             >
               <GameCard {...gameData} />

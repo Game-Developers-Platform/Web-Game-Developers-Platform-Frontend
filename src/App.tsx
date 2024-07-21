@@ -27,6 +27,11 @@ const router = [
     component: GamePage,
     isPrivate: true,
   },
+  {
+    path: "*",
+    component: HomePage,
+    isPrivate: true,
+  },
 ];
 
 const BoxContainer = styled(Box)({
@@ -41,13 +46,11 @@ const BoxContent = styled(Box)({
 });
 
 const App = () => {
-  const isAuthenticated = true; // TODO - Implement authentication logic
-
   return (
     <ThemeProvider theme={muiTheme}>
       <Router>
         <BoxContainer sx={{ backgroundColor: muiTheme.palette.primary.main }}>
-          {isAuthenticated && <Navbar />}
+          <Navbar />
           <BoxContent>
             <Routes>
               {router.map(({ path, component: Component, isPrivate }) => (

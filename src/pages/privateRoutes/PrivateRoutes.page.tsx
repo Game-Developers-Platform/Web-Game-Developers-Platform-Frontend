@@ -1,9 +1,12 @@
-import {Navigate} from "react-router-dom"
+import { Navigate } from "react-router-dom";
+import { useIsAuthenticated } from "../../store/store";
+import useAuthenticated from "../../hooks/useAuthenticated";
 
-const PrivateRoutes = ({children}: {children: React.ReactNode}) => {
-  //TODO - Connect with backend and check token.
-  const isAuthenticated = true;
-  return isAuthenticated ? children : <Navigate to="/signIn"/>
-}
+const PrivateRoutes = ({ children }: { children: React.ReactNode }) => {
+  useAuthenticated();
+  const isAuthenticated = useIsAuthenticated((state) => state.isAuthenticated);
 
-export default PrivateRoutes
+  return isAuthenticated ? children : <Navigate to="/signIn" />;
+};
+
+export default PrivateRoutes;

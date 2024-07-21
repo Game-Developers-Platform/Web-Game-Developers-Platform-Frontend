@@ -18,4 +18,4 @@ export const supportedCategories = [
   "First-Person-Shooter",
 ];
 
-export const supportedPlatforms = ["Steam", "Origin", "Epic Games", "XBox"];
+export const supportedPlatforms = ["Steam", "EA", "Epic Games", "XBox"];

@@ -15,6 +15,7 @@ import AdbIcon from "@mui/icons-material/Adb";
 import { useNavigate } from "react-router-dom";
 import muiTheme from "../../themes/muiTheme";
 import AddGameModal from "./AddGameModal";
+import { useIsAuthenticated } from "../../store/store";
 
 interface NavbarTitleProps {
   display: { xs: string; md: string };
@@ -47,6 +48,11 @@ const NavbarTitle = ({ display, variant }: NavbarTitleProps) => (
 
 const Navbar = () => {
   const userId = localStorage.getItem("userId");
+
+  const isAuthenticated = useIsAuthenticated((state) => state.isAuthenticated);
+  const setIsAuthenticated = useIsAuthenticated(
+    (state) => state.setIsAuthenticated
+  );
 
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
     null
@@ -82,12 +88,20 @@ const Navbar = () => {
     setIsAddGameModalOpen(false);
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("userId");
+    setIsAuthenticated(false);
+    navigate("/signIn");
+  };
+
   const pages = [
     {
       title: "My Games",
-      path: "/myGames",
+      path: `/myGames/${userId}`,
       onClick: () => {
-        navigate("/myGames");
+        navigate(`/myGames/${userId}`);
         handleCloseNavMenu();
       },
     },
@@ -101,8 +115,8 @@ const Navbar = () => {
     },
   ];
   const settings = [
-    { title: "Profile", path: `/profile/${userId}` },
-    { title: "Logout", path: "/signIn" },
+    { title: "Profile", path: `/profile/${userId}`, onClick: () => {} },
+    { title: "Logout", path: "/signIn", onClick: () => handleLogout() },
   ];
 
   return (
@@ -118,92 +132,102 @@ const Navbar = () => {
           <Toolbar disableGutters>
             <NavbarTitle display={{ xs: "none", md: "flex" }} variant="h6" />
 
-            <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
-              <IconButton
-                size="large"
-                aria-label="account of current user"
-                aria-controls="menu-appbar"
-                aria-haspopup="true"
-                onClick={handleOpenNavMenu}
-                color="inherit"
-              >
-                <MenuIcon />
-              </IconButton>
-              <Menu
-                id="menu-appbar"
-                anchorEl={anchorElNav}
-                anchorOrigin={{
-                  vertical: "bottom",
-                  horizontal: "left",
-                }}
-                keepMounted
-                transformOrigin={{
-                  vertical: "top",
-                  horizontal: "left",
-                }}
-                open={Boolean(anchorElNav)}
-                onClose={() => setAnchorElNav(null)}
-                sx={{
-                  display: { xs: "block", md: "none" },
-                }}
-              >
-                {pages.map(({ title, onClick }) => (
-                  <MenuItem key={title} onClick={() => onClick()}>
-                    <Typography textAlign="center">{title}</Typography>
-                  </MenuItem>
-                ))}
-              </Menu>
-            </Box>
+            {isAuthenticated && (
+              <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
+                <IconButton
+                  size="large"
+                  aria-label="account of current user"
+                  aria-controls="menu-appbar"
+                  aria-haspopup="true"
+                  onClick={handleOpenNavMenu}
+                  color="inherit"
+                >
+                  <MenuIcon />
+                </IconButton>
+                <Menu
+                  id="menu-appbar"
+                  anchorEl={anchorElNav}
+                  anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "left",
+                  }}
+                  keepMounted
+                  transformOrigin={{
+                    vertical: "top",
+                    horizontal: "left",
+                  }}
+                  open={Boolean(anchorElNav)}
+                  onClose={() => setAnchorElNav(null)}
+                  sx={{
+                    display: { xs: "block", md: "none" },
+                  }}
+                >
+                  {pages.map(({ title, onClick }) => (
+                    <MenuItem key={title} onClick={() => onClick()}>
+                      <Typography textAlign="center">{title}</Typography>
+                    </MenuItem>
+                  ))}
+                </Menu>
+              </Box>
+            )}
 
             <NavbarTitle display={{ xs: "flex", md: "none" }} variant="h5" />
 
-            <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
-              {React.Children.toArray(
-                pages.map(({ title, onClick }) => (
-                  <Button
-                    onClick={() => onClick()}
-                    sx={{ my: 2, color: "white", display: "block" }}
-                  >
-                    {title}
-                  </Button>
-                ))
-              )}
-            </Box>
+            {isAuthenticated && (
+              <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
+                {React.Children.toArray(
+                  pages.map(({ title, onClick }) => (
+                    <Button
+                      onClick={() => onClick()}
+                      sx={{ my: 2, color: "white", display: "block" }}
+                    >
+                      {title}
+                    </Button>
+                  ))
+                )}
+              </Box>
+            )}
 
-            <Box sx={{ flexGrow: 0 }}>
-              <Tooltip title="Open settings">
-                <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                  <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
-                </IconButton>
-              </Tooltip>
-              <Menu
-                sx={{ mt: "45px" }}
-                id="menu-appbar"
-                anchorEl={anchorElUser}
-                anchorOrigin={{
-                  vertical: "top",
-                  horizontal: "right",
-                }}
-                keepMounted
-                transformOrigin={{
-                  vertical: "top",
-                  horizontal: "right",
-                }}
-                open={Boolean(anchorElUser)}
-                onClose={() => setAnchorElUser(null)}
-              >
-                {settings.map(({ title, path }) => (
-                  <MenuItem
-                    key={title}
-                    onClick={() => {
-                      handleCloseUserMenu(path);
-                    }}
-                  >
-                    <Typography textAlign="center">{title}</Typography>
-                  </MenuItem>
-                ))}
-              </Menu>
-            </Box>
+            {isAuthenticated && (
+              <Box sx={{ flexGrow: 0 }}>
+                <Tooltip title="Open settings">
+                  <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                    <Avatar
+                      alt="Remy Sharp"
+                      src="/static/images/avatar/2.jpg"
+                    />
+                  </IconButton>
+                </Tooltip>
+                <Menu
+                  sx={{ mt: "45px" }}
+                  id="menu-appbar"
+                  anchorEl={anchorElUser}
+                  anchorOrigin={{
+                    vertical: "top",
+                    horizontal: "right",
+                  }}
+                  keepMounted
+                  transformOrigin={{
+                    vertical: "top",
+                    horizontal: "right",
+                  }}
+                  open={Boolean(anchorElUser)}
+                  onClose={() => setAnchorElUser(null)}
+                >
+                  {settings.map(({ title, path, onClick }) => (
+                    <MenuItem
+                      key={title}
+                      onClick={() => {
+                        handleCloseUserMenu(path);
+                        onClick();
+                      }}
+                    >
+                      <Typography textAlign="center">{title}</Typography>
+                    </MenuItem>
+                  ))}
+                </Menu>
+              </Box>
+            )}
           </Toolbar>
         </Container>
       </AppBar>

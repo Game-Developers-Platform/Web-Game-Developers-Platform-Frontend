@@ -1,22 +1,20 @@
 import { Box, Grid, Typography, Button, IconButton } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
 import muiTheme from "../../themes/muiTheme";
-import steamLogo from "../../assets/icons/logo-steam.svg";
-import originLogo from "../../assets/icons/logo-origin.svg";
-import epicGamesLogo from "../../assets/icons/logo-epic-games.svg";
-import xboxLogo from "../../assets/icons/logo-xbox.svg";
 import { serverLink } from "../../utils/constants/serverLink.ts";
-import { IGame, IUser } from "../../utils/types/types.ts";
+import { IGame } from "../../utils/types/types.ts";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { platformLogoMap } from "../../utils/constants/platformsSupport.ts";
 
 const GamePage = () => {
   const navigate = useNavigate();
 
-  //TODO - Decide how this page gets userId and gameId.
   const userId = localStorage.getItem("userId");
   const { gameId } = useParams();
   const [game, setGame] = useState<IGame>({} as IGame);
+
+  const isMyGame = game?.developerId?._id === userId;
 
   useEffect(() => {
     const fetchGame = async () => {
@@ -26,18 +24,9 @@ const GamePage = () => {
     fetchGame();
   }, []);
 
-  const isMyGame = game?.developerId?._id === userId;
-
   const handleProfileClick = () => {
     navigate(`/profile/${game.developerId._id}`);
   };
-
-  const platformLogoMap = new Map<string, string>([
-    ["Steam", steamLogo],
-    ["Origin", originLogo],
-    ["EpicGames", epicGamesLogo],
-    ["Xbox", xboxLogo],
-  ]);
 
   return (
     <Box sx={{ flexGrow: 1, padding: 2 }}>

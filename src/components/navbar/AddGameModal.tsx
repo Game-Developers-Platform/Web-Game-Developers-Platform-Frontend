@@ -11,15 +11,32 @@ import {
   ListItemText,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
 import { styled } from "@mui/system";
 import muiTheme from "../../themes/muiTheme";
-import { IGame } from "../../utils/types/types";
+import {
+  supportedPlatforms,
+  supportedCategories,
+} from "../../utils/constants/supportedOptions";
+import { useRef, useState } from "react";
+import axios from "axios";
+import { uploadFileLink } from "../../utils/constants/serverLink";
 
 interface AddGameModalProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (game: IGame) => void;
 }
+
+export type NewGameType = {
+  name: string;
+  price: number;
+  image: string;
+  description: string;
+  developerId: string;
+  platformLinks: { platform: string; url: string }[];
+  releaseDate: Date;
+  categories: string[];
+};
 
 const ModalContent = styled(Box)(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
@@ -31,6 +48,22 @@ const ModalContent = styled(Box)(({ theme }) => ({
   maxWidth: "90vw",
   margin: "auto",
 }));
+
+const ImageBox = styled(Box)<{ imageUrl: string | null }>(
+  ({ theme, imageUrl }) => ({
+    width: "100%",
+    height: 150,
+    backgroundImage: `url(${imageUrl})`,
+    backgroundSize: "cover",
+    backgroundRepeat: "no-repeat",
+    borderRadius: theme.shape.borderRadius,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    cursor: "pointer",
+    border: `1px solid ${muiTheme.palette.text.secondary}`,
+  })
+);
 
 const CustomTextField = styled(TextField)(({ theme }) => ({
   "& .MuiInputBase-root": {
@@ -45,46 +78,53 @@ const CustomTextField = styled(TextField)(({ theme }) => ({
   },
 }));
 
-const AddGameModal = ({ open, onClose, onSubmit }: AddGameModalProps) => {
-  const [gameName, setGameName] = React.useState("");
-  const [price, setPrice] = React.useState("");
-  const [imageURL, setImageURL] = React.useState("");
-  const [description, setDescription] = React.useState("");
-  const [releaseDate, setReleaseDate] = React.useState("");
-  const [categories, setCategories] = React.useState<string[]>([]);
-  const [platformLinks, setPlatformLinks] = React.useState<
+const AddGameModal = ({ open, onClose }: AddGameModalProps) => {
+  const [gameName, setGameName] = useState("");
+  const [price, setPrice] = useState("");
+
+  const [fileName, setFileName] = useState<File | null>();
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+
+  const [description, setDescription] = useState("");
+  const [releaseDate, setReleaseDate] = useState("");
+  const [categories, setCategories] = useState<string[]>([]);
+  const [platformLinks, setPlatformLinks] = useState<
     { platform: string; url: string }[]
   >([]);
-  const [selectedPlatform, setSelectedPlatform] = React.useState<string>("");
+  const [selectedPlatform, setSelectedPlatform] = useState<string>("");
+  const connectedUser = localStorage.getItem("userId");
 
-  //TODO - change to fetch supported categories and platforms from constant files.
-  const supportedCategories = [
-    "Action",
-    "Adventure",
-    "RPG",
-    "Strategy",
-    "Sandbox",
-    "Puzzle",
-    "Turn-Based",
-    "First-Person-Shooter",
-  ];
-  const supportedPlatforms = ["Steam", "Origin", "Epic Games", "XBox"];
+  const handleSubmit = async () => {
+    try {
+      const imageData = new FormData();
+      imageData.append("file", fileName as Blob);
+      const uploadResponse = await axios.post(`${uploadFileLink}`, imageData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
-  const handleFormSubmit = () => {
-    const newGame: IGame = {
-      id: "",
-      name: gameName,
-      price: parseFloat(price),
-      image: imageURL,
-      description: description,
-      developerId: "",
-      platformLinks: platformLinks,
-      releaseDate: new Date(releaseDate),
-      views: 0,
-      categories: categories,
-    };
+      const newGame: NewGameType = {
+        name: gameName,
+        price: parseFloat(price),
+        image: uploadResponse.data.file.path,
+        description: description,
+        developerId: connectedUser as string,
+        platformLinks: platformLinks,
+        releaseDate: new Date(releaseDate),
+        categories: categories,
+      };
 
-    onSubmit(newGame);
+      console.log(uploadResponse.data.file);
+
+      //TODO - Check that uploadResponse.data.file.path is correct.
+      //TODO - Try to change how the file name is saved in multer to be with date.
+      //TODO - continue the handleSubmit function.
+    } catch (error) {
+      console.error("File upload failed:", error);
+    }
+
     onClose();
   };
 
@@ -113,6 +153,23 @@ const AddGameModal = ({ open, onClose, onSubmit }: AddGameModalProps) => {
       updatedPlatforms[index].url = url;
       return updatedPlatforms;
     });
+  };
+
+  const handleIconClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    console.log(event.target.files);
+    const file = event.target.files?.[0];
+    if (file) {
+      setFileName(file);
+
+      const url = URL.createObjectURL(file);
+      setImageUrl(url);
+    }
   };
 
   return (
@@ -146,6 +203,18 @@ const AddGameModal = ({ open, onClose, onSubmit }: AddGameModalProps) => {
         >
           Add New Game
         </Typography>
+        <ImageBox imageUrl={imageUrl || ""} onClick={handleIconClick}>
+          {!imageUrl && (
+            <AddAPhotoIcon sx={{ color: muiTheme.palette.text.secondary }} />
+          )}
+        </ImageBox>
+        <input
+          type="file"
+          accept="image/*"
+          ref={fileInputRef}
+          style={{ display: "none" }}
+          onChange={handleFileChange}
+        />
         <CustomTextField
           label="Game Name"
           value={gameName}
@@ -158,14 +227,6 @@ const AddGameModal = ({ open, onClose, onSubmit }: AddGameModalProps) => {
           label="Price"
           value={price}
           onChange={(e) => setPrice(e.target.value)}
-          fullWidth
-          margin="normal"
-          variant="outlined"
-        />
-        <CustomTextField
-          label="Image URL"
-          value={imageURL}
-          onChange={(e) => setImageURL(e.target.value)}
           fullWidth
           margin="normal"
           variant="outlined"
@@ -289,7 +350,7 @@ const AddGameModal = ({ open, onClose, onSubmit }: AddGameModalProps) => {
         <Button
           variant="contained"
           color="primary"
-          onClick={handleFormSubmit}
+          onClick={handleSubmit}
           sx={{
             backgroundColor: muiTheme.palette.background.default,
             color: muiTheme.palette.secondary.main,

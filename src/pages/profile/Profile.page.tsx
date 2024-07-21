@@ -4,6 +4,7 @@ import {
   Box,
   Button,
   Grid,
+  IconButton,
   Modal,
   TextField,
   Typography,
@@ -15,9 +16,9 @@ import { useNavigate, useParams } from "react-router-dom";
 import { IGame, IUser } from "../../utils/types/types.ts";
 import { serverLink } from "../../utils/constants/serverLink.ts";
 import axios from "axios";
+import { socialNetworksLogoMap } from "../../utils/constants/platformsSupport.ts";
 
 const ProfilePage = () => {
-  //TODO - Decide how this page gets userId.
   const { userId } = useParams();
   const [user, setUser] = useState<IUser>({} as IUser);
 
@@ -129,9 +130,23 @@ const ProfilePage = () => {
           >
             Games Published: {user.gamesId?.length}
           </Typography>
+          <Box sx={{ display: "flex", gap: 1, marginTop: 1 }}>
+            {user?.socialNetworks?.map((socialNetwork) => (
+              <IconButton
+                key={socialNetwork.platform}
+                onClick={() => window.open(socialNetwork.url, "_blank")}
+              >
+                <img
+                  src={socialNetworksLogoMap.get(socialNetwork.platform)}
+                  alt={socialNetwork.platform}
+                  style={{ width: 32, height: 32 }}
+                />
+              </IconButton>
+            ))}
+          </Box>
           <Button
             sx={{ color: muiTheme.palette.text.secondary }}
-            onClick={() => navigate("/myGames")}
+            onClick={() => navigate(`/myGames/${userId}`)}
             variant="contained"
             color="primary"
           >

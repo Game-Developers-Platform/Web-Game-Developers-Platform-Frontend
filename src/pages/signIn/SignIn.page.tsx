@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
 import {
   Button,
   TextField,
@@ -12,9 +12,11 @@ import {
   ThemeProvider,
 } from "@mui/material";
 import muiTheme from "../../themes/muiTheme";
-import axios from "axios";
 import { usePost } from "../../hooks/usePost";
 import { authLink } from "../../utils/constants/serverLink";
+import { useIsAuthenticated } from "../../store/store";
+import axios from "axios";
+import useAuthenticated from "../../hooks/useAuthenticated";
 
 export type SignInType = {
   email: string;
@@ -66,9 +68,16 @@ export default function SignIn() {
     password: "",
   });
 
+  useAuthenticated();
+
+  const navigate = useNavigate();
+
+  const setIsAuthenticated = useIsAuthenticated(
+    (state) => state.setIsAuthenticated
+  );
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log(formData);
     setFormData({
       email: "",
       password: "",
@@ -83,7 +92,8 @@ export default function SignIn() {
         localStorage.setItem("token", token);
         localStorage.setItem("refreshToken", refreshToken);
         localStorage.setItem("userId", userId);
-        window.location.href = "http://localhost:5173";
+        setIsAuthenticated(true);
+        navigate("/");
       })
       .catch((error) => {
         console.error("Login failed:", error);

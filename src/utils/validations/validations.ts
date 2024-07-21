@@ -59,3 +59,22 @@ export const validateBirthdate = (birthdate: string) => {
 
   return age >= 16 ? "" : "You must be at least 16 years old.";
 };
+
+export const validateGameName = (name: string) => {
+  const nameRegex = /^(?!^\s|\s$)[A-Za-z0-9\s]{2,30}$/;
+  return nameRegex.test(name)
+    ? ""
+    : "Name must be between 2 and 30 characters long and contain only letters, numbers, and spaces.";
+};
+
+export const validateDescription = (description: string) => {
+  const descriptionRegex = /^(?!^\s|\s$)[A-Za-z0-9\s]{2,300}$/;
+  return descriptionRegex.test(description)
+    ? ""
+    : "Description must be between 2 and 300 characters long and contain only letters, numbers, and spaces.";
+};
+
+export const validatePrice = (price: string) => {
+  const priceRegex = /^\d+(\.\d{1,2})?$/;
+  return priceRegex.test(price) ? "" : "Invalid price format.";
+};
