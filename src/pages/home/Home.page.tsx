@@ -14,7 +14,7 @@ import {
 import { Clear as ClearIcon } from "@mui/icons-material";
 import GameCard from "../../components/GameCard";
 import muiTheme from "../../themes/muiTheme";
-import { IGame, IUser } from "../../utils/types/types";
+import { IGame } from "../../utils/types/types";
 import axios from "axios";
 import { serverLink } from "../../utils/constants/serverLink";
 
@@ -42,9 +42,6 @@ const HomePage = () => {
   const [expanded, setExpanded] = useState(false);
   const [games, setGames] = useState<IGame[]>([]);
 
-  //TODO - Remove this temp check:
-  const userId = localStorage.getItem("userId");
-
   useEffect(() => {
     const fetchGames = async () => {
       const response = await axios.get(`${serverLink}/games/`);
@@ -62,7 +59,6 @@ const HomePage = () => {
   };
 
   const handleCategoryChange = (event: SelectChangeEvent<string>) => {
-    console.log(event.target);
     const category = event.target.value as string;
     if (category && !filters.includes(category)) {
       setFilters([...filters, category]);
@@ -91,8 +87,6 @@ const HomePage = () => {
         filters.every((filter) => game.categories.includes(filter)))
     );
   });
-
-  console.log(games);
 
   return (
     games && (

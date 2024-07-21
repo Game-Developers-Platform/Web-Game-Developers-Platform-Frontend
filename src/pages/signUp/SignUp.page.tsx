@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { NavLink } from "react-router-dom";
 import {
   Avatar,
@@ -16,7 +16,10 @@ import {
   MenuItem,
 } from "@mui/material/";
 import muiTheme from "../../themes/muiTheme";
-import { HelpOutline as HelpOutlineIcon } from "@mui/icons-material";
+import {
+  HelpOutline as HelpOutlineIcon,
+  CloudUpload,
+} from "@mui/icons-material";
 import { styled } from "@mui/system";
 import {
   validateBirthdate,
@@ -28,13 +31,21 @@ import {
 } from "../../utils/validations/validations";
 import { supportedSocialNetworks } from "../../utils/constants/supportedOptions";
 import { getPlatformRegex } from "../../utils/constants/regex";
+import axios from "axios";
+import {
+  authLink,
+  serverLink,
+  uploadFileLink,
+} from "../../utils/constants/serverLink";
+import { usePost } from "../../hooks/usePost";
 
 export type SignUpType = {
+  profileImage: string;
   name: string;
   email: string;
   password: string;
   confirmPassword: string;
-  birthdate: string;
+  birthDate: string;
   socialNetworks: { platform: string; url: string }[];
 };
 
@@ -106,12 +117,18 @@ const customTheme = createTheme({
 
 const SignUpPage = () => {
   const theme = useTheme();
+
+  const [fileName, setFileName] = React.useState<File | null>();
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+
   const [formData, setFormData] = useState<SignUpType>({
+    profileImage: "",
     name: "",
     email: "",
     password: "",
     confirmPassword: "",
-    birthdate: "",
+    birthDate: "",
     socialNetworks: [],
   });
   const [errors, setErrors] = useState({
@@ -119,7 +136,7 @@ const SignUpPage = () => {
     email: "",
     password: "",
     confirmPassword: "",
-    birthdate: "",
+    birthDate: "",
     socialNetworks: [] as { platform: string; urlError: string }[],
   });
 
@@ -128,7 +145,7 @@ const SignUpPage = () => {
   >([]);
   const [selectedPlatform, setSelectedPlatform] = React.useState<string>("");
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const filteredPlatforms = platformLinks.filter(
@@ -143,7 +160,7 @@ const SignUpPage = () => {
         formData.confirmPassword,
         formData.password
       ),
-      birthdate: validateBirthdate(formData.birthdate),
+      birthDate: validateBirthdate(formData.birthDate),
       socialNetworks: filteredPlatforms.map(({ platform, url }) => ({
         platform,
         urlError: validateUrl(url, getPlatformRegex(platform), platform),
@@ -156,19 +173,46 @@ const SignUpPage = () => {
         newErrors.email,
         newErrors.password,
         newErrors.confirmPassword,
-        newErrors.birthdate,
+        newErrors.birthDate,
       ].some((error) => error !== "") ||
       newErrors.socialNetworks.some(({ urlError }) => urlError !== "");
 
     if (!hasErrors) {
-      setFormData({
-        name: "",
-        email: "",
-        password: "",
-        confirmPassword: "",
-        birthdate: "",
-        socialNetworks: filteredPlatforms,
-      });
+      try {
+        const uploadResponse = await axios.post(`${uploadFileLink}`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+
+        setFormData((prev) => ({
+          ...prev,
+          profileImage: uploadResponse.data.file,
+        }));
+
+        await usePost(`${authLink}/register`, formData)
+          .then((response) => response.data)
+          .catch((error) => {
+            console.error("Register failed:", error);
+          });
+
+        await usePost(`${authLink}/login`, {
+          email: formData.email,
+          password: formData.password,
+        })
+          .then((response) => response.data)
+          .then(({ token, refreshToken, userId }) => {
+            localStorage.setItem("token", token);
+            localStorage.setItem("refreshToken", refreshToken);
+            localStorage.setItem("userId", userId);
+            window.location.href = "http://localhost:5173";
+          })
+          .catch((error) => {
+            console.error("Login failed:", error);
+          });
+      } catch (error) {
+        console.error("File upload failed:", error);
+      }
     } else {
       setErrors(newErrors);
     }
@@ -176,6 +220,12 @@ const SignUpPage = () => {
 
   const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
+
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [name]: "",
+    }));
+
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -221,6 +271,25 @@ const SignUpPage = () => {
     });
   };
 
+  const handleIconClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    console.log(event.target.files);
+    const file = event.target.files?.[0];
+    if (file) {
+      setFileName(file);
+
+      formData.profileImage = file.name;
+
+      const url = URL.createObjectURL(file);
+      setImageUrl(url);
+    }
+  };
+
   return (
     <ThemeProvider theme={customTheme}>
       <Container component="main" maxWidth="xs">
@@ -239,21 +308,48 @@ const SignUpPage = () => {
           >
             Sign Up
           </Typography>
-          <IconButton
+          <Box
             sx={{
-              m: 1,
-              bgcolor: theme.palette.secondary.contrastText,
-              p: 0,
-            }}
-            onClick={() => {
-              //TODO - Handle Icon Selector
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              marginBottom: "1rem",
             }}
           >
-            <Avatar
-              src={`https://api.adorable.io/avatars/100/${Math.random()}.png`}
-              sx={{ width: 56, height: 56 }}
+            <IconButton
+              sx={{
+                m: 1,
+                p: 0,
+                width: 56,
+                height: 56,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                backgroundColor: theme.palette.secondary.contrastText,
+              }}
+              onClick={handleIconClick}
+            >
+              <Avatar
+                src={
+                  imageUrl ||
+                  `https://api.adorable.io/avatars/100/${Math.random()}.png`
+                }
+                sx={{ width: 56, height: 56 }}
+              />
+            </IconButton>
+            <input
+              type="file"
+              ref={fileInputRef}
+              style={{ display: "none" }}
+              onChange={handleFileChange}
+              accept="image/*"
             />
-          </IconButton>
+            {fileName && (
+              <Typography sx={{ color: theme.palette.text.secondary }}>
+                {fileName.name}
+              </Typography>
+            )}
+          </Box>
           <Box
             component="form"
             noValidate
@@ -277,6 +373,7 @@ const SignUpPage = () => {
                   InputProps={{
                     endAdornment: (
                       <Tooltip
+                        tabIndex={-1}
                         title={
                           <div>
                             <Typography variant="body2">
@@ -313,6 +410,7 @@ const SignUpPage = () => {
                   InputProps={{
                     endAdornment: (
                       <Tooltip
+                        tabIndex={-1}
                         title={
                           <div>
                             <Typography variant="body2">
@@ -348,6 +446,7 @@ const SignUpPage = () => {
                   InputProps={{
                     endAdornment: (
                       <Tooltip
+                        tabIndex={-1}
                         title={
                           <div>
                             <Typography variant="body2">
@@ -385,6 +484,7 @@ const SignUpPage = () => {
                   InputProps={{
                     endAdornment: (
                       <Tooltip
+                        tabIndex={-1}
                         title={
                           <div>
                             <Typography variant="body2">
@@ -410,13 +510,13 @@ const SignUpPage = () => {
                   fullWidth
                   id="birthdate"
                   label="Birthdate"
-                  name="birthdate"
+                  name="birthDate"
                   type="date"
                   InputLabelProps={{ shrink: true }}
                   onChange={onChange}
-                  value={formData.birthdate}
-                  helperText={errors.birthdate}
-                  error={Boolean(errors.birthdate)}
+                  value={formData.birthDate}
+                  helperText={errors.birthDate}
+                  error={Boolean(errors.birthDate)}
                 />
               </Grid>
             </Grid>

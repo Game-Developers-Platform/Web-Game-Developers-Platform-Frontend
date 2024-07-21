@@ -21,7 +21,6 @@ const GameCard = ({
   _id: string;
   developerId: IUser;
 }) => {
-  console.log(image, name, description, _id, developerId);
   const navigate = useNavigate();
 
   const truncateText = (text: string, maxLength: number) => {

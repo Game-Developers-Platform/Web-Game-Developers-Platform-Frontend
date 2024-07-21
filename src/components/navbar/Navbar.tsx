@@ -95,7 +95,6 @@ const Navbar = () => {
       title: "Add Game",
       path: "/addGame",
       onClick: () => {
-        console.log("test");
         handleOpenAddGameModal();
         handleCloseNavMenu();
       },

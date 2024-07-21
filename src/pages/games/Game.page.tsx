@@ -29,7 +29,7 @@ const GamePage = () => {
   const isMyGame = game?.developerId?._id === userId;
 
   const handleProfileClick = () => {
-    navigate(`/profile/${game.developerId}`);
+    navigate(`/profile/${game.developerId._id}`);
   };
 
   const platformLogoMap = new Map<string, string>([

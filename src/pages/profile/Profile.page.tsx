@@ -94,8 +94,6 @@ const ProfilePage = () => {
     return age;
   };
 
-  console.log("user", user);
-
   return (
     user && (
       <ProfileContainer>
@@ -164,7 +162,6 @@ const ProfilePage = () => {
 
         <GamesGrid container spacing={2}>
           {user.gamesId?.map((game: IGame) => {
-            console.log("Game:", game);
             return (
               <Grid item xs={12} sm={6} md={4} lg={3} key={game._id}>
                 <GameCard {...game} />

@@ -12,6 +12,9 @@ import {
   ThemeProvider,
 } from "@mui/material";
 import muiTheme from "../../themes/muiTheme";
+import axios from "axios";
+import { usePost } from "../../hooks/usePost";
+import { authLink } from "../../utils/constants/serverLink";
 
 export type SignInType = {
   email: string;
@@ -63,13 +66,28 @@ export default function SignIn() {
     password: "",
   });
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     console.log(formData);
     setFormData({
       email: "",
       password: "",
     });
+
+    await usePost(`${authLink}/login`, {
+      email: formData.email,
+      password: formData.password,
+    })
+      .then((response) => response.data)
+      .then(({ token, refreshToken, userId }) => {
+        localStorage.setItem("token", token);
+        localStorage.setItem("refreshToken", refreshToken);
+        localStorage.setItem("userId", userId);
+        window.location.href = "http://localhost:5173";
+      })
+      .catch((error) => {
+        console.error("Login failed:", error);
+      });
   };
 
   const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
