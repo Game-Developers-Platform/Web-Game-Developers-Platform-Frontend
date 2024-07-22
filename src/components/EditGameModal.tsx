@@ -13,30 +13,31 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
 import { styled } from "@mui/system";
-import muiTheme from "../../themes/muiTheme";
+import muiTheme from "../themes/muiTheme";
 import {
   supportedPlatforms,
   supportedCategories,
-} from "../../utils/constants/supportedOptions";
+} from "../utils/constants/supportedOptions";
 import { useRef, useState } from "react";
 import axios from "axios";
-import { serverLink, uploadFileLink } from "../../utils/constants/serverLink";
+import { serverLink, uploadFileLink } from "../utils/constants/serverLink";
 import { useNavigate } from "react-router-dom";
+import { IGame } from "../utils/types/types";
 
-interface AddGameModalProps {
+interface EditGameModalProps {
   open: boolean;
   onClose: () => void;
+  game: IGame;
 }
 
-export type NewGameType = {
-  name: string;
-  price: number;
-  image: string;
-  description: string;
-  developerId: string;
-  platformLinks: { platform: string; url: string }[];
-  releaseDate: Date;
-  categories: string[];
+export type EditGameType = {
+  name?: string;
+  price?: number;
+  image?: string;
+  description?: string;
+  platformLinks?: { platform: string; url: string }[];
+  releaseDate?: Date;
+  categories?: string[];
 };
 
 const ModalContent = styled(Box)(({ theme }) => ({
@@ -45,7 +46,7 @@ const ModalContent = styled(Box)(({ theme }) => ({
   borderRadius: theme.shape.borderRadius,
   display: "flex",
   flexDirection: "column",
-  width: "30%",
+  width: "40%",
   maxWidth: "90vw",
   margin: "auto",
 }));
@@ -54,7 +55,7 @@ const ImageBox = styled(Box)<{ imageUrl: string | null }>(
   ({ theme, imageUrl }) => ({
     width: "100%",
     height: 150,
-    backgroundImage: `url(${imageUrl})`,
+    backgroundImage: imageUrl ? `url(${imageUrl})` : "none",
     backgroundSize: "cover",
     backgroundRepeat: "no-repeat",
     borderRadius: theme.shape.borderRadius,
@@ -79,7 +80,7 @@ const CustomTextField = styled(TextField)(({ theme }) => ({
   },
 }));
 
-const AddGameModal = ({ open, onClose }: AddGameModalProps) => {
+const EditGameModal = ({ open, onClose, game }: EditGameModalProps) => {
   const navigate = useNavigate();
 
   const [fileName, setFileName] = useState<File | null>(null);
@@ -98,33 +99,38 @@ const AddGameModal = ({ open, onClose }: AddGameModalProps) => {
   const connectedUser = localStorage.getItem("userId");
 
   const handleSubmit = async () => {
-    try {
-      const imageData = new FormData();
-      imageData.append("file", fileName as Blob);
-      const uploadResponse = await axios.post(`${uploadFileLink}`, imageData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+    const newGame: EditGameType = {};
 
-      const newGame: NewGameType = {
-        name: gameName,
-        price: parseFloat(price),
-        image: uploadResponse.data.file,
-        description: description,
-        developerId: connectedUser as string,
-        platformLinks: platformLinks,
-        releaseDate: new Date(releaseDate),
-        categories: categories,
-      };
-
-      await axios.post(`${serverLink}/games`, newGame).then(() => {
-        onClose();
-        navigate(`/myGames/${connectedUser}`);
-      });
-    } catch (error) {
-      console.error("File upload failed:", error);
+    if (fileName !== null) {
+      try {
+        const imageData = new FormData();
+        imageData.append("file", fileName as Blob);
+        const uploadResponse = await axios.post(
+          `${uploadFileLink}`,
+          imageData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+        newGame.image = uploadResponse.data.file;
+      } catch (error) {
+        console.error("File upload failed:", error);
+      }
     }
+
+    if (gameName !== "") newGame.name = gameName;
+    if (price !== "") newGame.price = parseFloat(price);
+    if (description !== "") newGame.description = description;
+    if (releaseDate !== "") newGame.releaseDate = new Date(releaseDate);
+    if (categories.length > 0) newGame.categories = categories;
+    if (platformLinks.length > 0) newGame.platformLinks = platformLinks;
+
+    await axios.put(`${serverLink}/games/${game._id}`, newGame).then(() => {
+      onClose();
+      navigate(`/myGames/${connectedUser}`);
+    });
   };
 
   const handleCategoryChange = (
@@ -174,8 +180,8 @@ const AddGameModal = ({ open, onClose }: AddGameModalProps) => {
     <Modal
       open={open}
       onClose={onClose}
-      aria-labelledby="add-game-modal"
-      aria-describedby="modal-to-add-a-new-game"
+      aria-labelledby="edit-game-modal"
+      aria-describedby="modal-to-edit-a-new-game"
       sx={{
         display: "flex",
         alignItems: "center",
@@ -199,7 +205,7 @@ const AddGameModal = ({ open, onClose }: AddGameModalProps) => {
           variant="h6"
           component="h2"
         >
-          Add New Game
+          Edit Game
         </Typography>
         <ImageBox imageUrl={imageUrl} onClick={handleIconClick}>
           {!imageUrl && (
@@ -356,4 +362,4 @@ const AddGameModal = ({ open, onClose }: AddGameModalProps) => {
   );
 };
 
-export default AddGameModal;
+export default EditGameModal;

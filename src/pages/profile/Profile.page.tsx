@@ -107,7 +107,7 @@ const ProfilePage = () => {
           {user.name}
         </Typography>
         <Avatar
-          src={user.profileImage}
+          src={serverLink + "/" + user.profileImage}
           alt={user.name}
           sx={{ width: 150, height: 150 }}
         />

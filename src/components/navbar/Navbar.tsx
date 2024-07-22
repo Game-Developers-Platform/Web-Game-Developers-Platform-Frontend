@@ -16,6 +16,9 @@ import { useNavigate } from "react-router-dom";
 import muiTheme from "../../themes/muiTheme";
 import AddGameModal from "./AddGameModal";
 import { useIsAuthenticated } from "../../store/store";
+import axios from "axios";
+import { serverLink } from "../../utils/constants/serverLink";
+import { IUser } from "../../utils/types/types";
 
 interface NavbarTitleProps {
   display: { xs: string; md: string };
@@ -48,6 +51,16 @@ const NavbarTitle = ({ display, variant }: NavbarTitleProps) => (
 
 const Navbar = () => {
   const userId = localStorage.getItem("userId");
+
+  const [user, setUser] = React.useState({} as IUser);
+
+  React.useEffect(() => {
+    const fetchUser = async () => {
+      const response = await axios.get(`${serverLink}/users/${userId}`);
+      setUser(response.data);
+    };
+    fetchUser();
+  }, []);
 
   const isAuthenticated = useIsAuthenticated((state) => state.isAuthenticated);
   const setIsAuthenticated = useIsAuthenticated(
@@ -194,7 +207,7 @@ const Navbar = () => {
                   <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                     <Avatar
                       alt="Remy Sharp"
-                      src="/static/images/avatar/2.jpg"
+                      src={serverLink + "/" + user.profileImage}
                     />
                   </IconButton>
                 </Tooltip>
@@ -236,7 +249,6 @@ const Navbar = () => {
         <AddGameModal
           open={isAddGameModalOpen}
           onClose={handleCloseAddGameModal}
-          onSubmit={() => {}}
         />
       )}
     </>

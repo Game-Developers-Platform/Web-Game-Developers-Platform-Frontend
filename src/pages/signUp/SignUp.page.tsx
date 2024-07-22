@@ -195,14 +195,10 @@ const SignUpPage = () => {
           }
         );
 
-        console.log(uploadResponse.data.file);
-
-        setFormData((prev) => ({
-          ...prev,
-          profileImage: uploadResponse.data.file.path,
-        }));
-
-        await usePost(`${authLink}/register`, formData)
+        await usePost(`${authLink}/register`, {
+          ...formData,
+          profileImage: uploadResponse.data.file,
+        })
           .then((response) => response.data)
           .catch((error) => {
             console.error("Register failed:", error);
@@ -291,7 +287,6 @@ const SignUpPage = () => {
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    console.log(event.target.files);
     const file = event.target.files?.[0];
     if (file) {
       setFileName(file);

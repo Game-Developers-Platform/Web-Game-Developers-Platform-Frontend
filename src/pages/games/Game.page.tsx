@@ -2,17 +2,20 @@ import { Box, Grid, Typography, Button, IconButton } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
 import muiTheme from "../../themes/muiTheme";
 import { serverLink } from "../../utils/constants/serverLink.ts";
-import { IGame } from "../../utils/types/types.ts";
+import { IGame, IUser } from "../../utils/types/types.ts";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { platformLogoMap } from "../../utils/constants/platformsSupport.ts";
+import EditGameModal from "../../components/EditGameModal.tsx";
 
 const GamePage = () => {
   const navigate = useNavigate();
-
-  const userId = localStorage.getItem("userId");
   const { gameId } = useParams();
+  const userId = localStorage.getItem("userId");
+
   const [game, setGame] = useState<IGame>({} as IGame);
+  const [developer, setDeveloper] = useState<IUser>({} as IUser);
+  const [modalOpen, setModalOpen] = useState(false);
 
   const isMyGame = game?.developerId?._id === userId;
 
@@ -22,10 +25,18 @@ const GamePage = () => {
       setGame(response.data);
     };
     fetchGame();
-  }, []);
+  }, [gameId]);
 
   const handleProfileClick = () => {
     navigate(`/profile/${game.developerId._id}`);
+  };
+
+  const handleEditGameClick = () => {
+    setModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
   };
 
   return (
@@ -57,7 +68,7 @@ const GamePage = () => {
             marginBottom: 2,
           }}
           alt={game.name}
-          src={game.image}
+          src={serverLink + "/" + game.image}
         />
         <Box
           sx={{
@@ -198,7 +209,7 @@ const GamePage = () => {
               marginBottom: 1.5,
             }}
           >
-            {game.name}
+            {game.developerId?.name}
           </Typography>
           <Button
             variant="contained"
@@ -214,8 +225,26 @@ const GamePage = () => {
           >
             {isMyGame ? "My Profile" : "Developer's Profile"}
           </Button>
+          {isMyGame && (
+            <Button
+              variant="contained"
+              sx={{
+                marginTop: "1rem",
+                backgroundColor: muiTheme.palette.secondary.main,
+                color: muiTheme.palette.text.secondary,
+                "&:hover": {
+                  backgroundColor: muiTheme.palette.primary.dark,
+                },
+              }}
+              onClick={handleEditGameClick}
+            >
+              {"Edit Game"}
+            </Button>
+          )}
         </Box>
       </Grid>
+
+      <EditGameModal open={modalOpen} onClose={handleCloseModal} game={game} />
     </Box>
   );
 };

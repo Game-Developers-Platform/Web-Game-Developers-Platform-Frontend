@@ -7,6 +7,7 @@ import Typography from "@mui/material/Typography";
 import { useNavigate } from "react-router-dom";
 import muiTheme from "../themes/muiTheme";
 import { IUser } from "../utils/types/types";
+import { serverLink } from "../utils/constants/serverLink";
 
 const GameCard = ({
   image,
@@ -45,7 +46,7 @@ const GameCard = ({
       <CardMedia
         component={"img"}
         sx={{ height: 140 }}
-        image={image}
+        image={serverLink + "/" + image}
         title={name}
       />
       <CardContent
