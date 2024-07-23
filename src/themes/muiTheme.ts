@@ -9,6 +9,8 @@ declare module "@mui/material/styles" {
     button: string;
     hover: string;
     details: string;
+    delete: string;
+    deleteHover: string;
   }
 }
 
@@ -25,13 +27,15 @@ const theme = createTheme({
     },
     text: {
       primary: "#1B1B1B",
-      secondary: "#EEEEEE", //Used for dropdown menu's.
+      secondary: "#EEEEEE",
       title: "#222831",
       description: "#31363F",
       button: "#1B1B1B",
       link: "#76ABAE",
       hover: "#416263",
       details: "#76ABAE",
+      delete: "#b5142e",
+      deleteHover: "#5e0513",
     },
   },
 });

@@ -118,10 +118,19 @@ const AddGameModal = ({ open, onClose }: AddGameModalProps) => {
         categories: categories,
       };
 
-      await axios.post(`${serverLink}/games`, newGame).then(() => {
-        onClose();
-        navigate(`/myGames/${connectedUser}`);
-      });
+      await axios
+        .post(`${serverLink}/games`, newGame)
+        .then((response) => response.data)
+        .then((response) => {
+          axios
+            .put(`${serverLink}/users/addGame/${connectedUser}`, {
+              gamesId: response._id,
+            })
+            .then(() => {
+              onClose();
+              navigate(`/myGames/${connectedUser}`);
+            });
+        });
     } catch (error) {
       console.error("File upload failed:", error);
     }

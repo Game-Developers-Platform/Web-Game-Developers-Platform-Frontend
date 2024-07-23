@@ -1,44 +1,37 @@
-import React, { useEffect, useState } from "react";
-import {
-  Avatar,
-  Box,
-  Button,
-  Grid,
-  IconButton,
-  Modal,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { useEffect, useState } from "react";
+import { Avatar, Box, Button, IconButton, Typography } from "@mui/material";
 import { styled } from "@mui/system";
-import GameCard from "../../components/GameCard";
 import muiTheme from "../../themes/muiTheme";
 import { useNavigate, useParams } from "react-router-dom";
-import { IGame, IUser } from "../../utils/types/types.ts";
+import { IUser } from "../../utils/types/types.ts";
 import { serverLink } from "../../utils/constants/serverLink.ts";
 import axios from "axios";
 import { socialNetworksLogoMap } from "../../utils/constants/platformsSupport.ts";
+import EditUserModal from "../../components/EditProfileModal.tsx";
 
 const ProfilePage = () => {
+  const navigate = useNavigate();
   const { userId } = useParams();
   const [user, setUser] = useState<IUser>({} as IUser);
+  const [isEditModalOpen, setEditModalOpen] = useState(false);
 
   const currentUserId = localStorage.getItem("userId");
   const isOwnProfile = user._id === currentUserId;
 
+  const fetchUser = async () => {
+    const response = await axios.get(`${serverLink}/users/${userId}`);
+    setUser(response.data);
+  };
+
   useEffect(() => {
-    const fetchUser = async () => {
-      const response = await axios.get(`${serverLink}/users/${userId}`);
-      setUser(response.data);
-    };
     fetchUser();
-  }, []);
-
-  const [isEditModalOpen, setEditModalOpen] = useState(false);
-
-  const navigate = useNavigate();
+  }, [userId]);
 
   const handleOpenEditModal = () => setEditModalOpen(true);
-  const handleCloseEditModal = () => setEditModalOpen(false);
+  const handleCloseEditModal = () => {
+    fetchUser();
+    setEditModalOpen(false);
+  };
 
   const ProfileContainer = styled(Box)(({ theme }) => ({
     display: "flex",
@@ -53,32 +46,6 @@ const ProfilePage = () => {
     flexDirection: "column",
     alignItems: "center",
     gap: theme.spacing(1),
-  }));
-
-  const EditModal = styled(Modal)(() => ({
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-  }));
-
-  const CustomTextField = styled(TextField)(() => ({
-    "& .MuiInputBase-root": {
-      color: muiTheme.palette.text.secondary,
-    },
-  }));
-
-  const ModalContent = styled(Box)(({ theme }) => ({
-    backgroundColor: theme.palette.background.paper,
-    padding: theme.spacing(4),
-    borderRadius: theme.shape.borderRadius,
-    display: "flex",
-    flexDirection: "column",
-    gap: theme.spacing(2),
-  }));
-
-  const GamesGrid = styled(Grid)(({ theme }) => ({
-    marginTop: theme.spacing(4),
-    width: "100%",
   }));
 
   const calculateAge = (birthdate: Date) => {
@@ -145,7 +112,13 @@ const ProfilePage = () => {
             ))}
           </Box>
           <Button
-            sx={{ color: muiTheme.palette.text.secondary }}
+            sx={{
+              backgroundColor: muiTheme.palette.background.default,
+              color: muiTheme.palette.text.secondary,
+              "&:hover": {
+                backgroundColor: muiTheme.palette.text.hover,
+              },
+            }}
             onClick={() => navigate(`/myGames/${userId}`)}
             variant="contained"
             color="primary"
@@ -154,7 +127,13 @@ const ProfilePage = () => {
           </Button>
           {isOwnProfile && (
             <Button
-              sx={{ color: muiTheme.palette.text.secondary }}
+              sx={{
+                backgroundColor: muiTheme.palette.background.default,
+                color: muiTheme.palette.text.secondary,
+                "&:hover": {
+                  backgroundColor: muiTheme.palette.text.hover,
+                },
+              }}
               variant="contained"
               color="primary"
               onClick={handleOpenEditModal}
@@ -163,65 +142,11 @@ const ProfilePage = () => {
             </Button>
           )}
         </ProfileDetails>
-
-        <Typography
-          sx={{ color: muiTheme.palette.text.secondary, marginTop: 2 }}
-          variant="h5"
-          component="h2"
-          align="center"
-        >
-          {isOwnProfile
-            ? "Your Most Viewed Games"
-            : `${user.name}'s Most Viewed Games`}
-        </Typography>
-
-        <GamesGrid container spacing={2}>
-          {user.gamesId?.map((game: IGame) => {
-            return (
-              <Grid item xs={12} sm={6} md={4} lg={3} key={game._id}>
-                <GameCard {...game} />
-              </Grid>
-            );
-          })}
-        </GamesGrid>
-
-        <EditModal open={isEditModalOpen} onClose={handleCloseEditModal}>
-          <ModalContent sx={{ backgroundColor: muiTheme.palette.primary.main }}>
-            <Typography
-              sx={{ color: muiTheme.palette.text.secondary }}
-              variant="h6"
-              component="h2"
-            >
-              Edit Profile
-            </Typography>
-            <CustomTextField label="Name" defaultValue={user.name} fullWidth />
-            <CustomTextField
-              label="Profile Image URL"
-              defaultValue={user.profileImage}
-              fullWidth
-            />
-            <CustomTextField
-              label="Birthdate"
-              type="date"
-              defaultValue={new Date(user.birthDate)}
-              fullWidth
-            />
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleCloseEditModal}
-              sx={{
-                backgroundColor: muiTheme.palette.background.default,
-                color: muiTheme.palette.secondary.main,
-                "&:hover": {
-                  backgroundColor: muiTheme.palette.text.hover, // Change to your desired hover background color
-                },
-              }}
-            >
-              Save
-            </Button>
-          </ModalContent>
-        </EditModal>
+        <EditUserModal
+          open={isEditModalOpen}
+          onClose={handleCloseEditModal}
+          user={user}
+        />
       </ProfileContainer>
     )
   );

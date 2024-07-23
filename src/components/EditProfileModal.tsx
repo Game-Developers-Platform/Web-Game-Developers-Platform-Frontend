@@ -7,41 +7,29 @@ import {
   TextField,
   IconButton,
   MenuItem,
-  Checkbox,
-  ListItemText,
+  Avatar,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
 import { styled } from "@mui/system";
 import muiTheme from "../themes/muiTheme";
-import {
-  supportedPlatforms,
-  supportedCategories,
-} from "../utils/constants/supportedOptions";
+import { supportedSocialNetworks } from "../utils/constants/supportedOptions";
 import { useRef, useState } from "react";
 import axios from "axios";
-import {
-  serverLink,
-  updateGameLink,
-  uploadFileLink,
-} from "../utils/constants/serverLink";
+import { updateUserLink, uploadFileLink } from "../utils/constants/serverLink";
 import { useNavigate } from "react-router-dom";
-import { IGame } from "../utils/types/types";
+import { IUser } from "../utils/types/types";
 
-interface EditGameModalProps {
+interface EditProfileModalProps {
   open: boolean;
   onClose: () => void;
-  game: IGame;
+  user: IUser;
 }
 
-export type EditGameType = {
+export type EditUserType = {
   name?: string;
-  price?: number;
-  image?: string;
-  description?: string;
-  platformLinks?: { platform: string; url: string }[];
-  releaseDate?: Date;
-  categories?: string[];
+  profileImage?: string;
+  socialNetworks?: { platform: string; url: string }[];
+  birthDate?: Date;
 };
 
 const ModalContent = styled(Box)(({ theme }) => ({
@@ -54,22 +42,6 @@ const ModalContent = styled(Box)(({ theme }) => ({
   maxWidth: "90vw",
   margin: "auto",
 }));
-
-const ImageBox = styled(Box)<{ imageUrl: string | null }>(
-  ({ theme, imageUrl }) => ({
-    width: "100%",
-    height: 150,
-    backgroundImage: imageUrl ? `url(${imageUrl})` : "none",
-    backgroundSize: "cover",
-    backgroundRepeat: "no-repeat",
-    borderRadius: theme.shape.borderRadius,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    cursor: "pointer",
-    border: `1px solid ${theme.palette.text.secondary}`,
-  })
-);
 
 const CustomTextField = styled(TextField)(({ theme }) => ({
   "& .MuiInputBase-root": {
@@ -84,26 +56,23 @@ const CustomTextField = styled(TextField)(({ theme }) => ({
   },
 }));
 
-const EditGameModal = ({ open, onClose, game }: EditGameModalProps) => {
+const EditUserModal = ({ open, onClose, user }: EditProfileModalProps) => {
   const navigate = useNavigate();
 
   const [fileName, setFileName] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
 
-  const [gameName, setGameName] = useState("");
-  const [price, setPrice] = useState("");
-  const [description, setDescription] = useState("");
-  const [releaseDate, setReleaseDate] = useState("");
-  const [categories, setCategories] = useState<string[]>([]);
-  const [platformLinks, setPlatformLinks] = useState<
+  const [name, setName] = useState("");
+  const [birthDate, setBirthDate] = useState("");
+  const [socialNetworks, setSocialNetworks] = useState<
     { platform: string; url: string }[]
   >([]);
+
   const [selectedPlatform, setSelectedPlatform] = useState<string>("");
-  const connectedUser = localStorage.getItem("userId");
 
   const handleSubmit = async () => {
-    const newGame: EditGameType = {};
+    const newUser: EditUserType = {};
 
     if (fileName !== null) {
       try {
@@ -118,29 +87,23 @@ const EditGameModal = ({ open, onClose, game }: EditGameModalProps) => {
             },
           }
         );
-        newGame.image = uploadResponse.data.file;
+        newUser.profileImage = uploadResponse.data.file;
       } catch (error) {
         console.error("File upload failed:", error);
       }
     }
 
-    if (gameName !== "") newGame.name = gameName;
-    if (price !== "") newGame.price = parseFloat(price);
-    if (description !== "") newGame.description = description;
-    if (releaseDate !== "") newGame.releaseDate = new Date(releaseDate);
-    if (categories.length > 0) newGame.categories = categories;
-    if (platformLinks.length > 0) newGame.platformLinks = platformLinks;
+    if (name !== "") newUser.name = name;
+    if (birthDate !== "") newUser.birthDate = new Date(birthDate);
+    if (socialNetworks.length > 0) newUser.socialNetworks = socialNetworks;
+    const token = localStorage.getItem("token") as string;
 
-    await axios.put(`${updateGameLink}${game._id}`, newGame).then(() => {
-      onClose();
-      navigate(`/myGames/${connectedUser}`);
-    });
-  };
-
-  const handleCategoryChange = (
-    event: React.ChangeEvent<{ value: unknown }>
-  ) => {
-    setCategories(event.target.value as string[]);
+    await axios
+      .put(updateUserLink, { token, updatedUser: newUser })
+      .then(() => {
+        onClose();
+        navigate(`/profile/${user._id}`);
+      });
   };
 
   const handlePlatformChange = (
@@ -148,8 +111,10 @@ const EditGameModal = ({ open, onClose, game }: EditGameModalProps) => {
   ) => {
     const platformName = event.target.value as string;
     setSelectedPlatform(platformName);
-    if (!platformLinks.find((platform) => platform.platform === platformName)) {
-      setPlatformLinks((prevPlatforms) => [
+    if (
+      !socialNetworks.find((platform) => platform.platform === platformName)
+    ) {
+      setSocialNetworks((prevPlatforms) => [
         ...prevPlatforms,
         { platform: platformName, url: "" },
       ]);
@@ -157,7 +122,7 @@ const EditGameModal = ({ open, onClose, game }: EditGameModalProps) => {
   };
 
   const handlePlatformUrlChange = (index: number, url: string) => {
-    setPlatformLinks((prevPlatforms) => {
+    setSocialNetworks((prevPlatforms) => {
       const updatedPlatforms = [...prevPlatforms];
       updatedPlatforms[index].url = url;
       return updatedPlatforms;
@@ -184,8 +149,8 @@ const EditGameModal = ({ open, onClose, game }: EditGameModalProps) => {
     <Modal
       open={open}
       onClose={onClose}
-      aria-labelledby="edit-game-modal"
-      aria-describedby="modal-to-edit-a-new-game"
+      aria-labelledby="edit-user-modal"
+      aria-describedby="modal-to-edit-a-new-user"
       sx={{
         display: "flex",
         alignItems: "center",
@@ -209,51 +174,60 @@ const EditGameModal = ({ open, onClose, game }: EditGameModalProps) => {
           variant="h6"
           component="h2"
         >
-          Edit Game
+          Edit User
         </Typography>
-        <ImageBox imageUrl={imageUrl} onClick={handleIconClick}>
-          {!imageUrl && (
-            <AddAPhotoIcon sx={{ color: muiTheme.palette.text.secondary }} />
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            marginBottom: "1rem",
+          }}
+        >
+          <IconButton
+            sx={{
+              m: 1,
+              p: 0,
+              width: 56,
+              height: 56,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: muiTheme.palette.secondary.contrastText,
+            }}
+            onClick={handleIconClick}
+          >
+            <Avatar
+              src={imageUrl || undefined}
+              sx={{ width: 56, height: 56 }}
+            />
+          </IconButton>
+          <input
+            type="file"
+            ref={fileInputRef}
+            style={{ display: "none" }}
+            onChange={handleFileChange}
+            accept="image/*"
+          />
+          {fileName && (
+            <Typography sx={{ color: muiTheme.palette.text.secondary }}>
+              {fileName.name}
+            </Typography>
           )}
-        </ImageBox>
-        <input
-          type="file"
-          accept="image/*"
-          ref={fileInputRef}
-          style={{ display: "none" }}
-          onChange={handleFileChange}
-        />
+        </Box>
         <CustomTextField
-          label="Game Name"
-          value={gameName}
-          onChange={(e) => setGameName(e.target.value)}
+          label="Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
           fullWidth
           margin="normal"
           variant="outlined"
         />
         <CustomTextField
-          label="Price"
-          value={price}
-          onChange={(e) => setPrice(e.target.value)}
-          fullWidth
-          margin="normal"
-          variant="outlined"
-        />
-        <CustomTextField
-          label="Description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          fullWidth
-          multiline
-          rows={4}
-          margin="normal"
-          variant="outlined"
-        />
-        <CustomTextField
-          label="Release Date"
+          label="Birth Date"
           type="date"
-          value={releaseDate}
-          onChange={(e) => setReleaseDate(e.target.value)}
+          value={birthDate}
+          onChange={(e) => setBirthDate(e.target.value)}
           fullWidth
           margin="normal"
           variant="outlined"
@@ -265,54 +239,7 @@ const EditGameModal = ({ open, onClose, game }: EditGameModalProps) => {
         />
         <CustomTextField
           select
-          label="Categories"
-          value={categories}
-          onChange={handleCategoryChange}
-          fullWidth
-          margin="normal"
-          variant="outlined"
-          SelectProps={{
-            multiple: true,
-            renderValue: (selected) => (selected as string[]).join(", "),
-            MenuProps: {
-              PaperProps: {
-                style: {
-                  display: "flex",
-                  flexWrap: "wrap",
-                  justifyContent: "left",
-                  backgroundColor: muiTheme.palette.primary.main,
-                  color: muiTheme.palette.text.secondary,
-                  height: "11rem",
-                },
-              },
-            },
-          }}
-          InputLabelProps={{
-            style: { color: muiTheme.palette.text.secondary },
-          }}
-        >
-          {supportedCategories.map((category) => (
-            <MenuItem
-              key={category}
-              value={category}
-              style={{ padding: "8px 16px" }}
-            >
-              <Checkbox
-                checked={categories.includes(category)}
-                style={{ color: muiTheme.palette.text.secondary }}
-              />
-              <ListItemText
-                primary={category}
-                primaryTypographyProps={{
-                  style: { color: muiTheme.palette.text.secondary },
-                }}
-              />
-            </MenuItem>
-          ))}
-        </CustomTextField>
-        <CustomTextField
-          select
-          label="Select Platform"
+          label="Social Network"
           value={selectedPlatform}
           onChange={handlePlatformChange}
           fullWidth
@@ -322,13 +249,13 @@ const EditGameModal = ({ open, onClose, game }: EditGameModalProps) => {
             style: { color: muiTheme.palette.text.secondary },
           }}
         >
-          {supportedPlatforms.map((platform) => (
+          {supportedSocialNetworks.map((platform) => (
             <MenuItem key={platform} value={platform}>
               {platform}
             </MenuItem>
           ))}
         </CustomTextField>
-        {platformLinks.map(
+        {socialNetworks.map(
           (platformLink, index) =>
             platformLink.platform === selectedPlatform && (
               <CustomTextField
@@ -366,4 +293,4 @@ const EditGameModal = ({ open, onClose, game }: EditGameModalProps) => {
   );
 };
 
-export default EditGameModal;
+export default EditUserModal;

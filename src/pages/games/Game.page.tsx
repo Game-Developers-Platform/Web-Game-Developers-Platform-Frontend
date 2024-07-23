@@ -1,4 +1,15 @@
-import { Box, Grid, Typography, Button, IconButton } from "@mui/material";
+import {
+  Box,
+  Grid,
+  Typography,
+  Button,
+  IconButton,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+} from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
 import muiTheme from "../../themes/muiTheme";
 import { serverLink } from "../../utils/constants/serverLink.ts";
@@ -14,16 +25,17 @@ const GamePage = () => {
   const userId = localStorage.getItem("userId");
 
   const [game, setGame] = useState<IGame>({} as IGame);
-  const [developer, setDeveloper] = useState<IUser>({} as IUser);
   const [modalOpen, setModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
   const isMyGame = game?.developerId?._id === userId;
 
+  const fetchGame = async () => {
+    const response = await axios.get(`${serverLink}/games/${gameId}`);
+    setGame(response.data);
+  };
+
   useEffect(() => {
-    const fetchGame = async () => {
-      const response = await axios.get(`${serverLink}/games/${gameId}`);
-      setGame(response.data);
-    };
     fetchGame();
   }, [gameId]);
 
@@ -35,8 +47,23 @@ const GamePage = () => {
     setModalOpen(true);
   };
 
+  const handleDeleteGameClick = () => {
+    setDeleteModalOpen(true);
+  };
+
   const handleCloseModal = () => {
+    fetchGame();
     setModalOpen(false);
+  };
+
+  const handleDeleteGame = async () => {
+    try {
+      await axios.delete(`${serverLink}/games/${gameId}`);
+      setDeleteModalOpen(false);
+      navigate(`/myGames/${userId}`);
+    } catch (error) {
+      console.error("Error deleting game:", error);
+    }
   };
 
   return (
@@ -215,10 +242,10 @@ const GamePage = () => {
             variant="contained"
             sx={{
               marginTop: "1rem",
-              backgroundColor: muiTheme.palette.secondary.main,
+              backgroundColor: muiTheme.palette.background.default,
               color: muiTheme.palette.text.secondary,
               "&:hover": {
-                backgroundColor: muiTheme.palette.primary.dark,
+                backgroundColor: muiTheme.palette.text.hover,
               },
             }}
             onClick={handleProfileClick}
@@ -226,25 +253,93 @@ const GamePage = () => {
             {isMyGame ? "My Profile" : "Developer's Profile"}
           </Button>
           {isMyGame && (
-            <Button
-              variant="contained"
-              sx={{
-                marginTop: "1rem",
-                backgroundColor: muiTheme.palette.secondary.main,
-                color: muiTheme.palette.text.secondary,
-                "&:hover": {
-                  backgroundColor: muiTheme.palette.primary.dark,
-                },
-              }}
-              onClick={handleEditGameClick}
-            >
-              {"Edit Game"}
-            </Button>
+            <Box sx={{ display: "flex", gap: 2, marginTop: "1rem" }}>
+              <Button
+                variant="contained"
+                sx={{
+                  backgroundColor: muiTheme.palette.background.default,
+                  color: muiTheme.palette.text.secondary,
+                  "&:hover": {
+                    backgroundColor: muiTheme.palette.text.hover,
+                  },
+                }}
+                onClick={handleEditGameClick}
+              >
+                Edit Game
+              </Button>
+              <Button
+                variant="contained"
+                sx={{
+                  backgroundColor: muiTheme.palette.text.delete,
+                  color: muiTheme.palette.common.white,
+                  "&:hover": {
+                    backgroundColor: muiTheme.palette.text.deleteHover,
+                  },
+                }}
+                onClick={handleDeleteGameClick}
+              >
+                Delete Game
+              </Button>
+            </Box>
           )}
         </Box>
       </Grid>
 
       <EditGameModal open={modalOpen} onClose={handleCloseModal} game={game} />
+
+      <Dialog
+        sx={{
+          "& .MuiDialog-paper": {
+            backgroundColor: muiTheme.palette.primary.main,
+          },
+        }}
+        open={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+      >
+        <DialogTitle sx={{ color: muiTheme.palette.text.secondary }}>
+          Delete Game
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete{" "}
+            <span
+              style={{
+                fontWeight: "bold",
+                color: muiTheme.palette.text.delete,
+              }}
+            >
+              {game.name}
+            </span>
+            ? This action is not reversible.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            sx={{
+              backgroundColor: muiTheme.palette.text.details,
+              color: muiTheme.palette.text.secondary,
+              "&:hover": {
+                backgroundColor: muiTheme.palette.text.hover,
+              },
+            }}
+            onClick={() => setDeleteModalOpen(false)}
+          >
+            Cancel
+          </Button>
+          <Button
+            sx={{
+              backgroundColor: muiTheme.palette.text.delete,
+              color: muiTheme.palette.text.secondary,
+              "&:hover": {
+                backgroundColor: muiTheme.palette.text.deleteHover,
+              },
+            }}
+            onClick={handleDeleteGame}
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

@@ -338,10 +338,7 @@ const SignUpPage = () => {
               onClick={handleIconClick}
             >
               <Avatar
-                src={
-                  imageUrl ||
-                  `https://api.adorable.io/avatars/100/${Math.random()}.png`
-                }
+                src={imageUrl || undefined}
                 sx={{ width: 56, height: 56 }}
               />
             </IconButton>

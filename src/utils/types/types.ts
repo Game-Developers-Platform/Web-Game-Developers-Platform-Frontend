@@ -7,7 +7,6 @@ export interface IGame {
   developerId: IUser;
   platformLinks: { platform: string; url: string }[];
   releaseDate: Date;
-  views: number;
   categories: string[];
 }
 
@@ -20,6 +19,5 @@ export interface IUser {
   socialNetworks: { platform: string; url: string }[];
   gamesId: IGame[];
   birthDate: Date;
-  views: number;
   refreshTokens: string[];
 }
