@@ -46,7 +46,7 @@ const GameCard = ({
       <CardMedia
         component={"img"}
         sx={{ height: 140 }}
-        image={serverLink + "/" + image}
+        image={serverLink + image}
         title={name}
       />
       <CardContent

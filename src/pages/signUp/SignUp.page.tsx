@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { NavLink } from "react-router-dom";
+import { Navigate, NavLink } from "react-router-dom";
 import {
   Avatar,
   Button,
@@ -16,10 +16,7 @@ import {
   MenuItem,
 } from "@mui/material/";
 import muiTheme from "../../themes/muiTheme";
-import {
-  HelpOutline as HelpOutlineIcon,
-  CloudUpload,
-} from "@mui/icons-material";
+import { HelpOutline as HelpOutlineIcon } from "@mui/icons-material";
 import { styled } from "@mui/system";
 import {
   validateBirthdate,
@@ -32,10 +29,9 @@ import {
 import { supportedSocialNetworks } from "../../utils/constants/supportedOptions";
 import { getPlatformRegex } from "../../utils/constants/regex";
 import axios from "axios";
-import { authLink, uploadFileLink } from "../../utils/constants/serverLink";
+import { authLink, fileLink } from "../../utils/constants/serverLink";
 import { usePost } from "../../hooks/usePost";
 import { useIsAuthenticated } from "../../store/store";
-import useAuthenticated from "../../hooks/useAuthenticated";
 
 export type SignUpType = {
   profileImage: string;
@@ -120,7 +116,11 @@ const SignUpPage = () => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
 
-  useAuthenticated();
+  const isAuthenticated = useIsAuthenticated((state) => state.isAuthenticated);
+
+  if (isAuthenticated) {
+    return <Navigate to={"/"} />;
+  }
 
   const setIsAuthenticated = useIsAuthenticated(
     (state) => state.setIsAuthenticated
@@ -185,15 +185,11 @@ const SignUpPage = () => {
       try {
         const imageData = new FormData();
         imageData.append("file", fileName as Blob);
-        const uploadResponse = await axios.post(
-          `${uploadFileLink}`,
-          imageData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
+        const uploadResponse = await axios.post(`${fileLink}`, imageData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
 
         await usePost(`${authLink}/register`, {
           ...formData,

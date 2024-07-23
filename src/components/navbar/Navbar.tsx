@@ -17,7 +17,7 @@ import muiTheme from "../../themes/muiTheme";
 import AddGameModal from "./AddGameModal";
 import { useIsAuthenticated } from "../../store/store";
 import axios from "axios";
-import { serverLink } from "../../utils/constants/serverLink";
+import { serverLink, userLink } from "../../utils/constants/serverLink";
 import { IUser } from "../../utils/types/types";
 
 interface NavbarTitleProps {
@@ -56,7 +56,7 @@ const Navbar = () => {
 
   React.useEffect(() => {
     const fetchUser = async () => {
-      const response = await axios.get(`${serverLink}/users/${userId}`);
+      const response = await axios.get(`${userLink}${userId}`);
       setUser(response.data);
     };
     fetchUser();
@@ -207,7 +207,7 @@ const Navbar = () => {
                   <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                     <Avatar
                       alt="Remy Sharp"
-                      src={serverLink + "/" + user.profileImage}
+                      src={serverLink + user.profileImage}
                     />
                   </IconButton>
                 </Tooltip>

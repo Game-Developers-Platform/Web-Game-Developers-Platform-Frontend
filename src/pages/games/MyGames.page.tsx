@@ -12,7 +12,7 @@ import { Clear as ClearIcon } from "@mui/icons-material";
 import GameCard from "../../components/GameCard";
 import muiTheme from "../../themes/muiTheme";
 import { useParams } from "react-router-dom";
-import { serverLink } from "../../utils/constants/serverLink";
+import { gameLink, serverLink } from "../../utils/constants/serverLink";
 import axios from "axios";
 import { IGame } from "../../utils/types/types";
 
@@ -33,9 +33,7 @@ const MyGamesPage = () => {
 
   useEffect(() => {
     const fetchGames = async () => {
-      const response = await axios.get(
-        `${serverLink}/games/developer/${userId}`
-      );
+      const response = await axios.get(`${gameLink}developer/${userId}`);
       setGames(response.data);
     };
     fetchGames();

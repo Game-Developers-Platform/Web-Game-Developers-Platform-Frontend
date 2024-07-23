@@ -4,7 +4,7 @@ import { styled } from "@mui/system";
 import muiTheme from "../../themes/muiTheme";
 import { useNavigate, useParams } from "react-router-dom";
 import { IUser } from "../../utils/types/types.ts";
-import { serverLink } from "../../utils/constants/serverLink.ts";
+import { serverLink, userLink } from "../../utils/constants/serverLink.ts";
 import axios from "axios";
 import { socialNetworksLogoMap } from "../../utils/constants/platformsSupport.ts";
 import EditUserModal from "../../components/EditProfileModal.tsx";
@@ -19,7 +19,7 @@ const ProfilePage = () => {
   const isOwnProfile = user._id === currentUserId;
 
   const fetchUser = async () => {
-    const response = await axios.get(`${serverLink}/users/${userId}`);
+    const response = await axios.get(`${userLink}${userId}`);
     setUser(response.data);
   };
 
@@ -74,7 +74,7 @@ const ProfilePage = () => {
           {user.name}
         </Typography>
         <Avatar
-          src={serverLink + "/" + user.profileImage}
+          src={serverLink + user.profileImage}
           alt={user.name}
           sx={{ width: 150, height: 150 }}
         />
@@ -97,7 +97,7 @@ const ProfilePage = () => {
           >
             Games Published: {user.gamesId?.length}
           </Typography>
-          <Box sx={{ display: "flex", gap: 1, marginTop: 1 }}>
+          <Box sx={{ display: "flex", gap: 1, mt: 1, mb: 1 }}>
             {user?.socialNetworks?.map((socialNetwork) => (
               <IconButton
                 key={socialNetwork.platform}
@@ -106,13 +106,14 @@ const ProfilePage = () => {
                 <img
                   src={socialNetworksLogoMap.get(socialNetwork.platform)}
                   alt={socialNetwork.platform}
-                  style={{ width: 32, height: 32 }}
+                  style={{ width: 38, height: 38 }}
                 />
               </IconButton>
             ))}
           </Box>
           <Button
             sx={{
+              mb: 1,
               backgroundColor: muiTheme.palette.background.default,
               color: muiTheme.palette.text.secondary,
               "&:hover": {

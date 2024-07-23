@@ -16,7 +16,7 @@ import GameCard from "../../components/GameCard";
 import muiTheme from "../../themes/muiTheme";
 import { IGame } from "../../utils/types/types";
 import axios from "axios";
-import { serverLink } from "../../utils/constants/serverLink";
+import { gameLink } from "../../utils/constants/serverLink";
 
 const categories = ["action", "adventure", "RPG", "strategy"];
 
@@ -44,7 +44,7 @@ const HomePage = () => {
 
   useEffect(() => {
     const fetchGames = async () => {
-      const response = await axios.get(`${serverLink}/games/`);
+      const response = await axios.get(`${gameLink}`);
       setGames(response.data);
     };
     fetchGames();
@@ -198,9 +198,9 @@ const HomePage = () => {
                 backgroundColor: muiTheme.palette.secondary.main,
                 color: muiTheme.palette.text.secondary,
                 "& .MuiChip-deleteIcon": {
-                  color: muiTheme.palette.background.default,
+                  color: muiTheme.palette.text.delete,
                   "&:hover": {
-                    color: muiTheme.palette.error.dark,
+                    color: muiTheme.palette.text.deleteHover,
                   },
                 },
               }}

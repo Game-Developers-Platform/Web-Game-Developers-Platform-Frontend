@@ -20,11 +20,7 @@ import {
 } from "../utils/constants/supportedOptions";
 import { useRef, useState } from "react";
 import axios from "axios";
-import {
-  serverLink,
-  updateGameLink,
-  uploadFileLink,
-} from "../utils/constants/serverLink";
+import { gameLink, fileLink } from "../utils/constants/serverLink";
 import { useNavigate } from "react-router-dom";
 import { IGame } from "../utils/types/types";
 
@@ -55,21 +51,21 @@ const ModalContent = styled(Box)(({ theme }) => ({
   margin: "auto",
 }));
 
-const ImageBox = styled(Box)<{ imageUrl: string | null }>(
-  ({ theme, imageUrl }) => ({
-    width: "100%",
-    height: 150,
-    backgroundImage: imageUrl ? `url(${imageUrl})` : "none",
-    backgroundSize: "cover",
-    backgroundRepeat: "no-repeat",
-    borderRadius: theme.shape.borderRadius,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    cursor: "pointer",
-    border: `1px solid ${theme.palette.text.secondary}`,
-  })
-);
+const ImageBox = styled(Box, {
+  shouldForwardProp: (props) => props != "imageUrl",
+})<{ imageUrl: string | null }>(({ theme, imageUrl }) => ({
+  width: "100%",
+  height: 150,
+  backgroundImage: `url(${imageUrl})`,
+  backgroundSize: "cover",
+  backgroundRepeat: "no-repeat",
+  borderRadius: theme.shape.borderRadius,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  cursor: "pointer",
+  border: `1px solid ${theme.palette.text.secondary}`,
+}));
 
 const CustomTextField = styled(TextField)(({ theme }) => ({
   "& .MuiInputBase-root": {
@@ -109,15 +105,11 @@ const EditGameModal = ({ open, onClose, game }: EditGameModalProps) => {
       try {
         const imageData = new FormData();
         imageData.append("file", fileName as Blob);
-        const uploadResponse = await axios.post(
-          `${uploadFileLink}`,
-          imageData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
+        const uploadResponse = await axios.post(`${fileLink}`, imageData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
         newGame.image = uploadResponse.data.file;
       } catch (error) {
         console.error("File upload failed:", error);
@@ -131,7 +123,7 @@ const EditGameModal = ({ open, onClose, game }: EditGameModalProps) => {
     if (categories.length > 0) newGame.categories = categories;
     if (platformLinks.length > 0) newGame.platformLinks = platformLinks;
 
-    await axios.put(`${updateGameLink}${game._id}`, newGame).then(() => {
+    await axios.put(`${gameLink}${game._id}`, newGame).then(() => {
       onClose();
       navigate(`/myGames/${connectedUser}`);
     });
@@ -185,7 +177,7 @@ const EditGameModal = ({ open, onClose, game }: EditGameModalProps) => {
       open={open}
       onClose={onClose}
       aria-labelledby="edit-game-modal"
-      aria-describedby="modal-to-edit-a-new-game"
+      aria-describedby="modal-to-edit-a-game"
       sx={{
         display: "flex",
         alignItems: "center",

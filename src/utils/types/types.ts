@@ -8,6 +8,7 @@ export interface IGame {
   platformLinks: { platform: string; url: string }[];
   releaseDate: Date;
   categories: string[];
+  comments: IComment[];
 }
 
 export interface IUser {
@@ -20,4 +21,11 @@ export interface IUser {
   gamesId: IGame[];
   birthDate: Date;
   refreshTokens: string[];
+}
+
+export interface IComment {
+  _id: string;
+  userId: IUser;
+  gameId: IGame;
+  description: string;
 }

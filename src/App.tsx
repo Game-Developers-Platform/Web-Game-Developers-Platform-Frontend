@@ -11,6 +11,7 @@ import GamePage from "./pages/games/Game.page";
 import PrivateRoutes from "./pages/privateRoutes/PrivateRoutes.page";
 import Navbar from "./components/navbar/Navbar";
 import Footer from "./components/footer/Footer";
+import AuthCheck from "./components/authCheck/AuthCheck";
 
 const router = [
   { path: "/signIn", component: SignInPage, isPrivate: false },
@@ -49,29 +50,31 @@ const App = () => {
   return (
     <ThemeProvider theme={muiTheme}>
       <Router>
-        <BoxContainer sx={{ backgroundColor: muiTheme.palette.primary.main }}>
-          <Navbar />
-          <BoxContent>
-            <Routes>
-              {router.map(({ path, component: Component, isPrivate }) => (
-                <Route
-                  key={path}
-                  path={path}
-                  element={
-                    isPrivate ? (
-                      <PrivateRoutes>
+        <AuthCheck>
+          <BoxContainer sx={{ backgroundColor: muiTheme.palette.primary.main }}>
+            <Navbar />
+            <BoxContent>
+              <Routes>
+                {router.map(({ path, component: Component, isPrivate }) => (
+                  <Route
+                    key={path}
+                    path={path}
+                    element={
+                      isPrivate ? (
+                        <PrivateRoutes>
+                          <Component />
+                        </PrivateRoutes>
+                      ) : (
                         <Component />
-                      </PrivateRoutes>
-                    ) : (
-                      <Component />
-                    )
-                  }
-                />
-              ))}
-            </Routes>
-          </BoxContent>
-          <Footer />
-        </BoxContainer>
+                      )
+                    }
+                  />
+                ))}
+              </Routes>
+            </BoxContent>
+            <Footer />
+          </BoxContainer>
+        </AuthCheck>
       </Router>
     </ThemeProvider>
   );

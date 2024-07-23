@@ -12,12 +12,26 @@ import {
 } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
 import muiTheme from "../../themes/muiTheme";
-import { serverLink } from "../../utils/constants/serverLink.ts";
-import { IGame, IUser } from "../../utils/types/types.ts";
+import {
+  gameLink,
+  serverLink,
+  userLink,
+} from "../../utils/constants/serverLink.ts";
+import { IComment, IGame } from "../../utils/types/types.ts";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { platformLogoMap } from "../../utils/constants/platformsSupport.ts";
 import EditGameModal from "../../components/EditGameModal.tsx";
+import styled from "styled-components";
+import CommentCard from "./CommentCard.tsx";
+import AddCommentModal from "../../components/AddCommentModal.tsx";
+
+const FlexedBox = styled(Box)(() => ({
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  marginTop: muiTheme.spacing(3),
+}));
 
 const GamePage = () => {
   const navigate = useNavigate();
@@ -27,17 +41,18 @@ const GamePage = () => {
   const [game, setGame] = useState<IGame>({} as IGame);
   const [modalOpen, setModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [isAddCommentModalOpen, setAddCommentModalOpen] = useState(false);
 
   const isMyGame = game?.developerId?._id === userId;
 
   const fetchGame = async () => {
-    const response = await axios.get(`${serverLink}/games/${gameId}`);
+    const response = await axios.get(`${gameLink}${gameId}`);
     setGame(response.data);
   };
 
   useEffect(() => {
     fetchGame();
-  }, [gameId]);
+  }, [gameId, game]);
 
   const handleProfileClick = () => {
     navigate(`/profile/${game.developerId._id}`);
@@ -51,16 +66,35 @@ const GamePage = () => {
     setDeleteModalOpen(true);
   };
 
-  const handleCloseModal = () => {
+  const handleEditCloseModal = () => {
     fetchGame();
     setModalOpen(false);
   };
 
+  const handleCommentModalClose = () => {
+    fetchGame();
+    setAddCommentModalOpen(false);
+  };
+
+  const handleCommentModalOpen = () => {
+    setAddCommentModalOpen(true);
+  };
+
   const handleDeleteGame = async () => {
     try {
-      await axios.delete(`${serverLink}/games/${gameId}`);
-      setDeleteModalOpen(false);
-      navigate(`/myGames/${userId}`);
+      await axios
+        .delete(`${gameLink}${gameId}`)
+        .then((response) => response.data)
+        .then((response) => {
+          axios
+            .put(`${userLink}removeGame/${userId}`, {
+              gameId: response._id,
+            })
+            .then(() => {
+              setDeleteModalOpen(false);
+              navigate(`/myGames/${userId}`);
+            });
+        });
     } catch (error) {
       console.error("Error deleting game:", error);
     }
@@ -87,7 +121,8 @@ const GamePage = () => {
           component="img"
           sx={{
             width: "100%",
-            maxWidth: { xs: 300, sm: 400, md: 500, lg: 600 },
+            maxWidth: { xs: 300, sm: 400, md: 450, lg: 450 },
+            maxHeight: 200,
             height: "auto",
             borderRadius: 1,
             boxShadow: 3,
@@ -95,7 +130,7 @@ const GamePage = () => {
             marginBottom: 2,
           }}
           alt={game.name}
-          src={serverLink + "/" + game.image}
+          src={serverLink + game.image}
         />
         <Box
           sx={{
@@ -179,38 +214,40 @@ const GamePage = () => {
             </Typography>
           </Box>
         </Box>
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            marginBottom: 2,
-          }}
-        >
-          <Typography
-            variant="h6"
+        {game?.platformLinks?.length > 0 && (
+          <Box
             sx={{
-              color: muiTheme.palette.text.secondary,
-              marginBottom: 0.5,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              marginBottom: 2,
             }}
           >
-            Released On
-          </Typography>
-          <Box sx={{ display: "flex", gap: 1, marginTop: 1 }}>
-            {game?.platformLinks?.map((platformLink) => (
-              <IconButton
-                key={platformLink.platform}
-                onClick={() => window.open(platformLink.url, "_blank")}
-              >
-                <img
-                  src={platformLogoMap.get(platformLink.platform)}
-                  alt={platformLink.platform}
-                  style={{ width: 32, height: 32 }}
-                />
-              </IconButton>
-            ))}
+            <Typography
+              variant="h6"
+              sx={{
+                color: muiTheme.palette.text.secondary,
+                marginBottom: 0.5,
+              }}
+            >
+              Released On
+            </Typography>
+            <Box sx={{ display: "flex", gap: 1, marginTop: 1 }}>
+              {game?.platformLinks?.map((platformLink) => (
+                <IconButton
+                  key={platformLink.platform}
+                  onClick={() => window.open(platformLink.url, "_blank")}
+                >
+                  <img
+                    src={platformLogoMap.get(platformLink.platform)}
+                    alt={platformLink.platform}
+                    style={{ width: 32, height: 32 }}
+                  />
+                </IconButton>
+              ))}
+            </Box>
           </Box>
-        </Box>
+        )}
         <Box
           sx={{
             display: "flex",
@@ -233,7 +270,7 @@ const GamePage = () => {
             sx={{
               color: muiTheme.palette.text.details,
               textAlign: "center",
-              marginBottom: 1.5,
+              marginBottom: 1,
             }}
           >
             {game.developerId?.name}
@@ -252,6 +289,22 @@ const GamePage = () => {
           >
             {isMyGame ? "My Profile" : "Developer's Profile"}
           </Button>
+          {isMyGame && (
+            <Button
+              variant="contained"
+              sx={{
+                mt: 2,
+                backgroundColor: muiTheme.palette.background.default,
+                color: muiTheme.palette.text.secondary,
+                "&:hover": {
+                  backgroundColor: muiTheme.palette.text.hover,
+                },
+              }}
+              onClick={handleCommentModalOpen}
+            >
+              Add Comment
+            </Button>
+          )}
           {isMyGame && (
             <Box sx={{ display: "flex", gap: 2, marginTop: "1rem" }}>
               <Button
@@ -283,9 +336,54 @@ const GamePage = () => {
             </Box>
           )}
         </Box>
+        {game.comments?.length > 0 && (
+          <Typography
+            variant="h5"
+            sx={{
+              color: muiTheme.palette.text.secondary,
+              marginBottom: 0.5,
+            }}
+          >
+            Comments
+          </Typography>
+        )}
+        {game.comments?.length > 0 && (
+          <FlexedBox sx={{ width: "100%" }}>
+            <Grid
+              container
+              rowSpacing={6}
+              columnSpacing={1}
+              justifyContent="center"
+            >
+              {game?.comments?.map((comment: IComment, index: number) => (
+                <Grid
+                  xs={6}
+                  sm={4}
+                  md={3}
+                  lg={2}
+                  item
+                  key={index}
+                  sx={{ display: "flex", justifyContent: "center" }}
+                >
+                  <CommentCard {...comment} />
+                </Grid>
+              ))}
+            </Grid>
+          </FlexedBox>
+        )}
       </Grid>
 
-      <EditGameModal open={modalOpen} onClose={handleCloseModal} game={game} />
+      <AddCommentModal
+        open={isAddCommentModalOpen}
+        onClose={handleCommentModalClose}
+        gameId={gameId as string}
+      />
+
+      <EditGameModal
+        open={modalOpen}
+        onClose={handleEditCloseModal}
+        game={game}
+      />
 
       <Dialog
         sx={{

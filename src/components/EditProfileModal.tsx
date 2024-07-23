@@ -15,7 +15,7 @@ import muiTheme from "../themes/muiTheme";
 import { supportedSocialNetworks } from "../utils/constants/supportedOptions";
 import { useRef, useState } from "react";
 import axios from "axios";
-import { updateUserLink, uploadFileLink } from "../utils/constants/serverLink";
+import { userLink, fileLink } from "../utils/constants/serverLink";
 import { useNavigate } from "react-router-dom";
 import { IUser } from "../utils/types/types";
 
@@ -78,15 +78,11 @@ const EditUserModal = ({ open, onClose, user }: EditProfileModalProps) => {
       try {
         const imageData = new FormData();
         imageData.append("file", fileName as Blob);
-        const uploadResponse = await axios.post(
-          `${uploadFileLink}`,
-          imageData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
+        const uploadResponse = await axios.post(`${fileLink}`, imageData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
         newUser.profileImage = uploadResponse.data.file;
       } catch (error) {
         console.error("File upload failed:", error);
@@ -98,12 +94,10 @@ const EditUserModal = ({ open, onClose, user }: EditProfileModalProps) => {
     if (socialNetworks.length > 0) newUser.socialNetworks = socialNetworks;
     const token = localStorage.getItem("token") as string;
 
-    await axios
-      .put(updateUserLink, { token, updatedUser: newUser })
-      .then(() => {
-        onClose();
-        navigate(`/profile/${user._id}`);
-      });
+    await axios.put(userLink, { token, updatedUser: newUser }).then(() => {
+      onClose();
+      navigate(`/profile/${user._id}`);
+    });
   };
 
   const handlePlatformChange = (
@@ -150,7 +144,7 @@ const EditUserModal = ({ open, onClose, user }: EditProfileModalProps) => {
       open={open}
       onClose={onClose}
       aria-labelledby="edit-user-modal"
-      aria-describedby="modal-to-edit-a-new-user"
+      aria-describedby="modal-to-edit-a-user"
       sx={{
         display: "flex",
         alignItems: "center",

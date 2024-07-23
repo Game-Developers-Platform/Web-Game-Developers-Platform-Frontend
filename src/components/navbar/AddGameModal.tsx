@@ -20,7 +20,7 @@ import {
 } from "../../utils/constants/supportedOptions";
 import { useRef, useState } from "react";
 import axios from "axios";
-import { serverLink, uploadFileLink } from "../../utils/constants/serverLink";
+import { serverLink, fileLink } from "../../utils/constants/serverLink";
 import { useNavigate } from "react-router-dom";
 
 interface AddGameModalProps {
@@ -34,7 +34,7 @@ export type NewGameType = {
   image: string;
   description: string;
   developerId: string;
-  platformLinks: { platform: string; url: string }[];
+  platformLinks?: { platform: string; url: string }[];
   releaseDate: Date;
   categories: string[];
 };
@@ -50,21 +50,21 @@ const ModalContent = styled(Box)(({ theme }) => ({
   margin: "auto",
 }));
 
-const ImageBox = styled(Box)<{ imageUrl: string | null }>(
-  ({ theme, imageUrl }) => ({
-    width: "100%",
-    height: 150,
-    backgroundImage: `url(${imageUrl})`,
-    backgroundSize: "cover",
-    backgroundRepeat: "no-repeat",
-    borderRadius: theme.shape.borderRadius,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    cursor: "pointer",
-    border: `1px solid ${theme.palette.text.secondary}`,
-  })
-);
+const ImageBox = styled(Box, {
+  shouldForwardProp: (props) => props != "imageUrl",
+})<{ imageUrl: string | null }>(({ theme, imageUrl }) => ({
+  width: "100%",
+  height: 150,
+  backgroundImage: `url(${imageUrl})`,
+  backgroundSize: "cover",
+  backgroundRepeat: "no-repeat",
+  borderRadius: theme.shape.borderRadius,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  cursor: "pointer",
+  border: `1px solid ${theme.palette.text.secondary}`,
+}));
 
 const CustomTextField = styled(TextField)(({ theme }) => ({
   "& .MuiInputBase-root": {
@@ -101,11 +101,15 @@ const AddGameModal = ({ open, onClose }: AddGameModalProps) => {
     try {
       const imageData = new FormData();
       imageData.append("file", fileName as Blob);
-      const uploadResponse = await axios.post(`${uploadFileLink}`, imageData, {
+      const uploadResponse = await axios.post(`${fileLink}`, imageData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
+
+      const filteredPlatformLinks = platformLinks.filter(
+        (platformLink) => platformLink.url !== ""
+      );
 
       const newGame: NewGameType = {
         name: gameName,
@@ -113,7 +117,7 @@ const AddGameModal = ({ open, onClose }: AddGameModalProps) => {
         image: uploadResponse.data.file,
         description: description,
         developerId: connectedUser as string,
-        platformLinks: platformLinks,
+        platformLinks: filteredPlatformLinks,
         releaseDate: new Date(releaseDate),
         categories: categories,
       };
@@ -124,7 +128,7 @@ const AddGameModal = ({ open, onClose }: AddGameModalProps) => {
         .then((response) => {
           axios
             .put(`${serverLink}/users/addGame/${connectedUser}`, {
-              gamesId: response._id,
+              gameId: response._id,
             })
             .then(() => {
               onClose();
@@ -191,7 +195,14 @@ const AddGameModal = ({ open, onClose }: AddGameModalProps) => {
         justifyContent: "center",
       }}
     >
-      <ModalContent sx={{ backgroundColor: muiTheme.palette.primary.main }}>
+      <ModalContent
+        sx={{
+          height: "90%",
+          overflowY: "auto",
+          overflowX: "hidden",
+          backgroundColor: muiTheme.palette.primary.main,
+        }}
+      >
         <IconButton
           onClick={onClose}
           sx={{

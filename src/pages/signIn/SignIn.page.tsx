@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { Navigate, NavLink, useNavigate } from "react-router-dom";
 import {
   Button,
   TextField,
@@ -15,8 +15,6 @@ import muiTheme from "../../themes/muiTheme";
 import { usePost } from "../../hooks/usePost";
 import { authLink } from "../../utils/constants/serverLink";
 import { useIsAuthenticated } from "../../store/store";
-import axios from "axios";
-import useAuthenticated from "../../hooks/useAuthenticated";
 
 export type SignInType = {
   email: string;
@@ -68,9 +66,13 @@ export default function SignIn() {
     password: "",
   });
 
-  useAuthenticated();
-
   const navigate = useNavigate();
+
+  const isAuthenticated = useIsAuthenticated((state) => state.isAuthenticated);
+
+  if (isAuthenticated) {
+    return <Navigate to={"/"} />;
+  }
 
   const setIsAuthenticated = useIsAuthenticated(
     (state) => state.setIsAuthenticated

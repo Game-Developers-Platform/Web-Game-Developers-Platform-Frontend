@@ -15,6 +15,7 @@ declare module "@mui/material/styles" {
 }
 
 const theme = createTheme({
+  spacing: 3,
   palette: {
     primary: {
       main: "#31363F", // Main content color
