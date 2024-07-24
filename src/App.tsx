@@ -49,9 +49,9 @@ const BoxContent = styled(Box)({
 
 const App = () => {
   return (
-    <GoogleOAuthProvider clientId="334014688158-u013u8apl7tlv9vmipl42jj9pnmi416t.apps.googleusercontent.com">
-      <ThemeProvider theme={muiTheme}>
-        <Router>
+    <ThemeProvider theme={muiTheme}>
+      <Router>
+        <GoogleOAuthProvider clientId="334014688158-u013u8apl7tlv9vmipl42jj9pnmi416t.apps.googleusercontent.com">
           <AuthCheck>
             <BoxContainer
               sx={{ backgroundColor: muiTheme.palette.primary.main }}
@@ -79,9 +79,9 @@ const App = () => {
               <Footer />
             </BoxContainer>
           </AuthCheck>
-        </Router>
-      </ThemeProvider>
-    </GoogleOAuthProvider>
+        </GoogleOAuthProvider>
+      </Router>
+    </ThemeProvider>
   );
 };
 

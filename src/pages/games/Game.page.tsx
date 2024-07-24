@@ -66,8 +66,6 @@ const GamePage = () => {
     setCurrencies(response.data);
   };
 
-  console.log(currencies);
-
   useEffect(() => {
     fetchGame();
   }, [gameId, game]);

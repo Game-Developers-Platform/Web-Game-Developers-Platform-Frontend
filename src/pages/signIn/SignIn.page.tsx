@@ -13,9 +13,14 @@ import {
 } from "@mui/material";
 import muiTheme from "../../themes/muiTheme";
 import { usePost } from "../../hooks/usePost";
-import { authLink } from "../../utils/constants/serverLink";
+import {
+  authLink,
+  googleLink,
+  userLink,
+} from "../../utils/constants/serverLink";
 import { useIsAuthenticated } from "../../store/store";
 import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
+import axios from "axios";
 
 export type SignInType = {
   email: string;
@@ -78,6 +83,14 @@ export default function SignIn() {
     (state) => state.setIsAuthenticated
   );
 
+  const authSuccess = (token: string, refreshToken: string, userId: string) => {
+    localStorage.setItem("token", token);
+    localStorage.setItem("refreshToken", refreshToken);
+    localStorage.setItem("userId", userId);
+    setIsAuthenticated(true);
+    navigate("/");
+  };
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setFormData({
@@ -91,11 +104,7 @@ export default function SignIn() {
     })
       .then((response) => response.data)
       .then(({ token, refreshToken, userId }) => {
-        localStorage.setItem("token", token);
-        localStorage.setItem("refreshToken", refreshToken);
-        localStorage.setItem("userId", userId);
-        setIsAuthenticated(true);
-        navigate("/");
+        authSuccess(token, refreshToken, userId);
       })
       .catch((error) => {
         console.error("Login failed:", error);
@@ -107,9 +116,38 @@ export default function SignIn() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const googleResponseMessage = (credentialResponse: CredentialResponse) => {
-    console.log(googleErrorMessage);
-    console.log(credentialResponse);
+  const googleAuthentication = async (
+    credentialResponse: CredentialResponse
+  ) => {
+    try {
+      const { data } = await axios.post(`${googleLink}`, {
+        credential: credentialResponse.credential,
+      });
+      if (data?.email) {
+        const { email, name } = data;
+        const user = await axios.post(`${userLink}email`, {
+          email: data.email,
+        });
+        if (user.data === null) {
+          await axios.post(`${googleLink}register`, {
+            name: name,
+            email: email,
+            password: "google-signup",
+          });
+        }
+        await axios
+          .post(`${authLink}login`, {
+            email: email,
+            password: "google-signup",
+          })
+          .then((response) => response.data)
+          .then(({ token, refreshToken, userId }) => {
+            authSuccess(token, refreshToken, userId);
+          });
+      }
+    } catch (error) {
+      console.error("Google Verify Error:", error);
+    }
   };
 
   const googleErrorMessage = () => {
@@ -185,7 +223,7 @@ export default function SignIn() {
               </Button>
               <Box sx={{ flex: 1 }}>
                 <GoogleLogin
-                  onSuccess={googleResponseMessage}
+                  onSuccess={googleAuthentication}
                   onError={googleErrorMessage}
                 />
               </Box>

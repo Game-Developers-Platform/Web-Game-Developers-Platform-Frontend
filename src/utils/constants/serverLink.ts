@@ -5,3 +5,4 @@ export const userLink: string = serverLink + "users/";
 export const fileLink: string = serverLink + "uploadFiles/upload/";
 export const commentLink: string = serverLink + "comments/";
 export const currencyLink: string = serverLink + "currencies/";
+export const googleLink: string = serverLink + "google/";
