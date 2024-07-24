@@ -15,6 +15,7 @@ import muiTheme from "../../themes/muiTheme";
 import { usePost } from "../../hooks/usePost";
 import { authLink } from "../../utils/constants/serverLink";
 import { useIsAuthenticated } from "../../store/store";
+import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
 
 export type SignInType = {
   email: string;
@@ -67,7 +68,6 @@ export default function SignIn() {
   });
 
   const navigate = useNavigate();
-
   const isAuthenticated = useIsAuthenticated((state) => state.isAuthenticated);
 
   if (isAuthenticated) {
@@ -105,6 +105,15 @@ export default function SignIn() {
   const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const googleResponseMessage = (credentialResponse: CredentialResponse) => {
+    console.log(googleErrorMessage);
+    console.log(credentialResponse);
+  };
+
+  const googleErrorMessage = () => {
+    console.log("Google Error");
   };
 
   return (
@@ -155,18 +164,32 @@ export default function SignIn() {
               value={formData.password}
               onChange={onChange}
             />
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
+            <Box
               sx={{
-                backgroundColor: theme.palette.background.default,
-                mt: 3,
-                mb: 2,
+                display: "flex",
+                justifyContent: "space-between",
+                mt: 1,
+                mb: 1,
+                gap: 2,
               }}
             >
-              Sign In
-            </Button>
+              <Button
+                type="submit"
+                variant="contained"
+                sx={{
+                  backgroundColor: theme.palette.background.default,
+                  flex: 1,
+                }}
+              >
+                Sign In
+              </Button>
+              <Box sx={{ flex: 1 }}>
+                <GoogleLogin
+                  onSuccess={googleResponseMessage}
+                  onError={googleErrorMessage}
+                />
+              </Box>
+            </Box>
             <Grid container>
               <Grid item xs>
                 <NavLink style={{ color: muiTheme.palette.text.hover }} to="/">
