@@ -1,57 +1,39 @@
-import {BrowserRouter as Router, Routes, Route} from "react-router-dom"
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Box, styled, ThemeProvider } from "@mui/material";
+import muiTheme from "./themes/muiTheme";
 
-import {Box, styled } from "@mui/material"
+import HomePage from "./pages/home/Home.page";
+import SignInPage from "./pages/signIn/SignIn.page";
+import SignUpPage from "./pages/signUp/SignUp.page";
+import MyGamesPage from "./pages/games/MyGames.page";
+import ProfilePage from "./pages/profile/Profile.page";
+import GamePage from "./pages/games/Game.page";
+import PrivateRoutes from "./pages/privateRoutes/PrivateRoutes.page";
+import Navbar from "./components/navbar/Navbar";
+import Footer from "./components/footer/Footer";
+import AuthCheck from "./components/authCheck/AuthCheck";
 
-import HomePage from "./pages/home/Home.page"
-import SignInPage from "./pages/signIn/SignIn.page"
-import SignUpPage from "./pages/signUp/SignUp.page"
-import MyGamesPage from "./pages/games/MyGames.page"
-import AddGamePage from "./pages/games/AddGame.page"
-import ProfilePage from "./pages/profile/Profile.page"
-import GamePage from "./pages/games/Game.page"
-import PrivateRoutes from "./pages/privateRoutes/PrivateRoutes.page"
-import Navbar from "./component/navbar/Navbar"
-import Footer from "./component/footer/Footer"
-
-
-const router = [{
-  path: "/signIn",
-  component: SignInPage ,
-  isPrivate: false
-},
-{
-  path: "/signUp",
-  component:  SignUpPage,
-  isPrivate: false
-},
-{
-  path: "/",
-  component: HomePage ,
-  isPrivate: true
-},
-{
-  path: "/profile",
-  component: ProfilePage ,
-  isPrivate: true
-},
-{
-  path: "/myGames",
-  component: MyGamesPage ,
-  isPrivate: true
-},
-{
-  path: "/addGame",
-  component: AddGamePage ,
-  isPrivate: true
-},
-{
-  path: "/game",
-  component: GamePage ,
-  isPrivate: true
-},
-]
-
-
+const router = [
+  { path: "/signIn", component: SignInPage, isPrivate: false },
+  { path: "/signUp", component: SignUpPage, isPrivate: false },
+  { path: "/", component: HomePage, isPrivate: true },
+  {
+    path: "/profile/:userId",
+    component: ProfilePage,
+    isPrivate: true,
+  },
+  { path: "/myGames/:userId", component: MyGamesPage, isPrivate: true },
+  {
+    path: "/game/:gameId",
+    component: GamePage,
+    isPrivate: true,
+  },
+  {
+    path: "*",
+    component: HomePage,
+    isPrivate: true,
+  },
+];
 
 const BoxContainer = styled(Box)({
   display: "flex",
@@ -65,24 +47,37 @@ const BoxContent = styled(Box)({
 });
 
 const App = () => {
-  const isAuthenticated = true;//TODO - call function to authenticate the token, if token exists.
   return (
-    <Router>
-      <BoxContainer>
-        {isAuthenticated && <Navbar/>}
-        <BoxContent>
-          <Routes>
-            { 
-              router.map(({path, component: Component, isPrivate}) => (
-                <Route key={path} path={path} element={isPrivate ? <PrivateRoutes><Component/></PrivateRoutes> : <Component/>} />
-              ))
-            }
-          </Routes>
-        </BoxContent>
-        <Footer/>
-      </BoxContainer>
-    </Router>
-  )
-}
+    <ThemeProvider theme={muiTheme}>
+      <Router>
+        <AuthCheck>
+          <BoxContainer sx={{ backgroundColor: muiTheme.palette.primary.main }}>
+            <Navbar />
+            <BoxContent>
+              <Routes>
+                {router.map(({ path, component: Component, isPrivate }) => (
+                  <Route
+                    key={path}
+                    path={path}
+                    element={
+                      isPrivate ? (
+                        <PrivateRoutes>
+                          <Component />
+                        </PrivateRoutes>
+                      ) : (
+                        <Component />
+                      )
+                    }
+                  />
+                ))}
+              </Routes>
+            </BoxContent>
+            <Footer />
+          </BoxContainer>
+        </AuthCheck>
+      </Router>
+    </ThemeProvider>
+  );
+};
 
-export default App
+export default App;
