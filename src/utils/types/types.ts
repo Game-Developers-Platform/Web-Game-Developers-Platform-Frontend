@@ -29,3 +29,8 @@ export interface IComment {
   gameId: IGame;
   description: string;
 }
+
+export interface ICurrency {
+  name: string;
+  exchangeRate: number;
+}

@@ -9,15 +9,23 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  SelectChangeEvent,
+  TextField,
+  ListItemText,
 } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
 import muiTheme from "../../themes/muiTheme";
 import {
+  currencyLink,
   gameLink,
   serverLink,
   userLink,
 } from "../../utils/constants/serverLink.ts";
-import { IComment, IGame } from "../../utils/types/types.ts";
+import { IComment, ICurrency, IGame } from "../../utils/types/types.ts";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { platformLogoMap } from "../../utils/constants/platformsSupport.ts";
@@ -39,9 +47,12 @@ const GamePage = () => {
   const userId = localStorage.getItem("userId");
 
   const [game, setGame] = useState<IGame>({} as IGame);
+  const [currencies, setCurrencies] = useState<ICurrency[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [isAddCommentModalOpen, setAddCommentModalOpen] = useState(false);
+  const [selectedCurrency, setSelectedCurrency] = useState<string>("");
+  const [convertedPrice, setConvertedPrice] = useState<number>(0);
 
   const isMyGame = game?.developerId?._id === userId;
 
@@ -50,9 +61,20 @@ const GamePage = () => {
     setGame(response.data);
   };
 
+  const fetchCurrencies = async () => {
+    const response = await axios.get(`${currencyLink}`);
+    setCurrencies(response.data);
+  };
+
+  console.log(currencies);
+
   useEffect(() => {
     fetchGame();
   }, [gameId, game]);
+
+  useEffect(() => {
+    fetchCurrencies();
+  }, []);
 
   const handleProfileClick = () => {
     navigate(`/profile/${game.developerId._id}`);
@@ -97,6 +119,16 @@ const GamePage = () => {
         });
     } catch (error) {
       console.error("Error deleting game:", error);
+    }
+  };
+
+  const handleCurrencyChange = (event: SelectChangeEvent<string>) => {
+    const currency = event.target.value;
+    setSelectedCurrency(currency);
+    const selectedCurrencyObj = currencies.find((cur) => cur.name === currency);
+    if (selectedCurrencyObj) {
+      const rate = selectedCurrencyObj.exchangeRate;
+      setConvertedPrice(Number((game.price * rate).toFixed(2)));
     }
   };
 
@@ -214,6 +246,66 @@ const GamePage = () => {
             </Typography>
           </Box>
         </Box>
+        {game.price > 0 && (
+          <Box sx={{ display: "flex", alignItems: "center", marginBottom: 2 }}>
+            <FormControl
+              variant="outlined"
+              sx={{ minWidth: 80, marginRight: 5 }}
+            >
+              <InputLabel id="currency-select-label">Currency</InputLabel>
+              <Select
+                labelId="currency-select-label"
+                id="currency-select"
+                value={selectedCurrency}
+                onChange={handleCurrencyChange}
+                label="Currency"
+                MenuProps={{
+                  PaperProps: {
+                    style: {
+                      display: "flex",
+                      flexWrap: "wrap",
+                      justifyContent: "left",
+                      backgroundColor: muiTheme.palette.primary.main,
+                      color: muiTheme.palette.text.secondary,
+                      height: "11rem",
+                    },
+                  },
+                }}
+                sx={{
+                  "& .MuiSelect-select": {
+                    height: 16,
+                    display: "flex",
+                    alignItems: "center",
+                  },
+                }}
+              >
+                {currencies.map((currency) => (
+                  <MenuItem
+                    key={currency.name}
+                    value={currency.name}
+                    style={{ padding: "8px 16px" }}
+                  >
+                    <ListItemText
+                      primary={currency.name}
+                      primaryTypographyProps={{
+                        style: { color: muiTheme.palette.text.secondary },
+                      }}
+                    />
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            {selectedCurrency && (
+              <Typography
+                sx={{
+                  color: muiTheme.palette.text.secondary,
+                }}
+              >
+                {convertedPrice}
+              </Typography>
+            )}
+          </Box>
+        )}
         {game?.platformLinks?.length > 0 && (
           <Box
             sx={{
