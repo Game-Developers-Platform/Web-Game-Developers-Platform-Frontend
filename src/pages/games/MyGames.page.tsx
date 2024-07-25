@@ -12,7 +12,7 @@ import { Clear as ClearIcon } from "@mui/icons-material";
 import GameCard from "../../components/GameCard";
 import muiTheme from "../../themes/muiTheme";
 import { useParams } from "react-router-dom";
-import { gameLink, serverLink } from "../../utils/constants/serverLink";
+import { gameLink } from "../../utils/constants/serverLink";
 import axios from "axios";
 import { IGame } from "../../utils/types/types";
 
