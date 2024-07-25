@@ -20,7 +20,12 @@ import {
 } from "../../utils/constants/supportedOptions";
 import { useRef, useState } from "react";
 import axios from "axios";
-import { serverLink, fileLink } from "../../utils/constants/serverLink";
+import {
+  serverLink,
+  fileLink,
+  gameLink,
+  userLink,
+} from "../../utils/constants/serverLink";
 import { useNavigate } from "react-router-dom";
 
 interface AddGameModalProps {
@@ -123,11 +128,11 @@ const AddGameModal = ({ open, onClose }: AddGameModalProps) => {
       };
 
       await axios
-        .post(`${serverLink}/games`, newGame)
+        .post(`${gameLink}`, newGame)
         .then((response) => response.data)
         .then((response) => {
           axios
-            .put(`${serverLink}/users/addGame/${connectedUser}`, {
+            .put(`${userLink}addGame/${connectedUser}`, {
               gameId: response._id,
             })
             .then(() => {

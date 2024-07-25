@@ -379,7 +379,7 @@ const GamePage = () => {
           >
             {isMyGame ? "My Profile" : "Developer's Profile"}
           </Button>
-          {isMyGame && (
+          {!isMyGame && (
             <Button
               variant="contained"
               sx={{
