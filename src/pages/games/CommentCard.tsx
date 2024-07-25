@@ -4,7 +4,7 @@ import CardContent from "@mui/material/CardContent";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import muiTheme from "../../themes/muiTheme";
-import { IComment, IGame, IUser } from "../../utils/types/types";
+import { IGame, IUser } from "../../utils/types/types";
 import { useEffect, useState } from "react";
 import {
   commentLink,

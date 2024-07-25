@@ -21,7 +21,6 @@ import {
 import { useRef, useState } from "react";
 import axios from "axios";
 import {
-  serverLink,
   fileLink,
   gameLink,
   userLink,
