@@ -210,7 +210,7 @@ const SignUpPage = () => {
             localStorage.setItem("refreshToken", refreshToken);
             localStorage.setItem("userId", userId);
             setIsAuthenticated(true);
-            window.location.href = "http://localhost:5173";
+            window.location.href = "/";
           })
           .catch((error) => {
             console.error("Login failed:", error);
