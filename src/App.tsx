@@ -12,6 +12,7 @@ import PrivateRoutes from "./pages/privateRoutes/PrivateRoutes.page";
 import Navbar from "./components/navbar/Navbar";
 import Footer from "./components/footer/Footer";
 import AuthCheck from "./components/authCheck/AuthCheck";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 const router = [
   { path: "/signIn", component: SignInPage, isPrivate: false },
@@ -50,31 +51,35 @@ const App = () => {
   return (
     <ThemeProvider theme={muiTheme}>
       <Router>
-        <AuthCheck>
-          <BoxContainer sx={{ backgroundColor: muiTheme.palette.primary.main }}>
-            <Navbar />
-            <BoxContent>
-              <Routes>
-                {router.map(({ path, component: Component, isPrivate }) => (
-                  <Route
-                    key={path}
-                    path={path}
-                    element={
-                      isPrivate ? (
-                        <PrivateRoutes>
+        <GoogleOAuthProvider clientId="334014688158-u013u8apl7tlv9vmipl42jj9pnmi416t.apps.googleusercontent.com">
+          <AuthCheck>
+            <BoxContainer
+              sx={{ backgroundColor: muiTheme.palette.primary.main }}
+            >
+              <Navbar />
+              <BoxContent>
+                <Routes>
+                  {router.map(({ path, component: Component, isPrivate }) => (
+                    <Route
+                      key={path}
+                      path={path}
+                      element={
+                        isPrivate ? (
+                          <PrivateRoutes>
+                            <Component />
+                          </PrivateRoutes>
+                        ) : (
                           <Component />
-                        </PrivateRoutes>
-                      ) : (
-                        <Component />
-                      )
-                    }
-                  />
-                ))}
-              </Routes>
-            </BoxContent>
-            <Footer />
-          </BoxContainer>
-        </AuthCheck>
+                        )
+                      }
+                    />
+                  ))}
+                </Routes>
+              </BoxContent>
+              <Footer />
+            </BoxContainer>
+          </AuthCheck>
+        </GoogleOAuthProvider>
       </Router>
     </ThemeProvider>
   );

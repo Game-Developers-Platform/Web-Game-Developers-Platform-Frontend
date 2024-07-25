@@ -66,8 +66,6 @@ const GamePage = () => {
     setCurrencies(response.data);
   };
 
-  console.log(currencies);
-
   useEffect(() => {
     fetchGame();
   }, [gameId, game]);
@@ -381,7 +379,7 @@ const GamePage = () => {
           >
             {isMyGame ? "My Profile" : "Developer's Profile"}
           </Button>
-          {isMyGame && (
+          {!isMyGame && (
             <Button
               variant="contained"
               sx={{

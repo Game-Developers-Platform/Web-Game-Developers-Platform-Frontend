@@ -36,8 +36,8 @@ const GameCard = ({
     <Card
       key={_id}
       sx={{
-        maxWidth: 345,
-        maxHeight: 345,
+        width: 345,
+        height: 345,
         display: "flex",
         flexDirection: "column",
         backgroundColor: muiTheme.palette.background.default,

@@ -13,8 +13,14 @@ import {
 } from "@mui/material";
 import muiTheme from "../../themes/muiTheme";
 import { usePost } from "../../hooks/usePost";
-import { authLink } from "../../utils/constants/serverLink";
+import {
+  authLink,
+  googleLink,
+  userLink,
+} from "../../utils/constants/serverLink";
 import { useIsAuthenticated } from "../../store/store";
+import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
+import axios from "axios";
 
 export type SignInType = {
   email: string;
@@ -67,7 +73,6 @@ export default function SignIn() {
   });
 
   const navigate = useNavigate();
-
   const isAuthenticated = useIsAuthenticated((state) => state.isAuthenticated);
 
   if (isAuthenticated) {
@@ -77,6 +82,14 @@ export default function SignIn() {
   const setIsAuthenticated = useIsAuthenticated(
     (state) => state.setIsAuthenticated
   );
+
+  const authSuccess = (token: string, refreshToken: string, userId: string) => {
+    localStorage.setItem("token", token);
+    localStorage.setItem("refreshToken", refreshToken);
+    localStorage.setItem("userId", userId);
+    setIsAuthenticated(true);
+    navigate("/");
+  };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -91,11 +104,7 @@ export default function SignIn() {
     })
       .then((response) => response.data)
       .then(({ token, refreshToken, userId }) => {
-        localStorage.setItem("token", token);
-        localStorage.setItem("refreshToken", refreshToken);
-        localStorage.setItem("userId", userId);
-        setIsAuthenticated(true);
-        navigate("/");
+        authSuccess(token, refreshToken, userId);
       })
       .catch((error) => {
         console.error("Login failed:", error);
@@ -105,6 +114,44 @@ export default function SignIn() {
   const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const googleAuthentication = async (
+    credentialResponse: CredentialResponse
+  ) => {
+    try {
+      const { data } = await axios.post(`${googleLink}`, {
+        credential: credentialResponse.credential,
+      });
+      if (data?.email) {
+        const { email, name } = data;
+        const user = await axios.post(`${userLink}email`, {
+          email: data.email,
+        });
+        if (user.data === null) {
+          await axios.post(`${googleLink}register`, {
+            name: name,
+            email: email,
+            password: "google-signup",
+          });
+        }
+        await axios
+          .post(`${authLink}login`, {
+            email: email,
+            password: "google-signup",
+          })
+          .then((response) => response.data)
+          .then(({ token, refreshToken, userId }) => {
+            authSuccess(token, refreshToken, userId);
+          });
+      }
+    } catch (error) {
+      console.error("Google Verify Error:", error);
+    }
+  };
+
+  const googleErrorMessage = () => {
+    console.log("Google Error");
   };
 
   return (
@@ -155,18 +202,32 @@ export default function SignIn() {
               value={formData.password}
               onChange={onChange}
             />
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
+            <Box
               sx={{
-                backgroundColor: theme.palette.background.default,
-                mt: 3,
-                mb: 2,
+                display: "flex",
+                justifyContent: "space-between",
+                mt: 1,
+                mb: 1,
+                gap: 2,
               }}
             >
-              Sign In
-            </Button>
+              <Button
+                type="submit"
+                variant="contained"
+                sx={{
+                  backgroundColor: theme.palette.background.default,
+                  flex: 1,
+                }}
+              >
+                Sign In
+              </Button>
+              <Box sx={{ flex: 1 }}>
+                <GoogleLogin
+                  onSuccess={googleAuthentication}
+                  onError={googleErrorMessage}
+                />
+              </Box>
+            </Box>
             <Grid container>
               <Grid item xs>
                 <NavLink style={{ color: muiTheme.palette.text.hover }} to="/">

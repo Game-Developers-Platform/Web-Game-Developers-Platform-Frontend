@@ -56,6 +56,7 @@ const Navbar = () => {
 
   React.useEffect(() => {
     const fetchUser = async () => {
+      if (userId === null) return;
       const response = await axios.get(`${userLink}${userId}`);
       setUser(response.data);
     };
