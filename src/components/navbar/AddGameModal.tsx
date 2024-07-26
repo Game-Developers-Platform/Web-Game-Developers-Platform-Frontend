@@ -20,11 +20,7 @@ import {
 } from "../../utils/constants/supportedOptions";
 import { useRef, useState } from "react";
 import axios from "axios";
-import {
-  fileLink,
-  gameLink,
-  userLink,
-} from "../../utils/constants/serverLink";
+import { fileLink, gameLink, userLink } from "../../utils/constants/serverLink";
 import { useNavigate } from "react-router-dom";
 
 interface AddGameModalProps {
@@ -137,6 +133,7 @@ const AddGameModal = ({ open, onClose }: AddGameModalProps) => {
             .then(() => {
               onClose();
               navigate(`/myGames/${connectedUser}`);
+              window.location.reload();
             });
         });
     } catch (error) {

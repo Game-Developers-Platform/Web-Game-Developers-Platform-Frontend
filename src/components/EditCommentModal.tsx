@@ -53,6 +53,7 @@ const EditCommentModal = ({
       };
 
       await axios.put(`${commentLink}/${commentId}`, newComment);
+      onClose();
     } catch (error) {
       console.error("Edit comment failed:", error);
     }
