@@ -52,12 +52,14 @@ const GamePage = () => {
   const [isAddCommentModalOpen, setAddCommentModalOpen] = useState(false);
   const [selectedCurrency, setSelectedCurrency] = useState<string>("");
   const [convertedPrice, setConvertedPrice] = useState<number>(0);
+  const [categoriesString, setCategoriesString] = useState<string>("");
 
   const isMyGame = game?.developerId?._id === userId;
 
   const fetchGame = async () => {
     const response = await axios.get(`${gameLink}${gameId}`);
     setGame(response.data);
+    setCategoriesString(response.data.categories.join(" | "));
   };
 
   const fetchCurrencies = async () => {
@@ -67,7 +69,7 @@ const GamePage = () => {
 
   useEffect(() => {
     fetchGame();
-  }, [gameId, game]);
+  }, []);
 
   useEffect(() => {
     fetchCurrencies();
@@ -186,6 +188,33 @@ const GamePage = () => {
             }}
           >
             {game.description}
+          </Typography>
+        </Box>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            marginBottom: 2,
+            width: "50%",
+          }}
+        >
+          <Typography
+            variant="h6"
+            sx={{
+              color: muiTheme.palette.text.secondary,
+              marginBottom: 0.5,
+            }}
+          >
+            Categories
+          </Typography>
+          <Typography
+            sx={{
+              color: muiTheme.palette.text.details,
+              textAlign: "center",
+            }}
+          >
+            {categoriesString}
           </Typography>
         </Box>
         <Box

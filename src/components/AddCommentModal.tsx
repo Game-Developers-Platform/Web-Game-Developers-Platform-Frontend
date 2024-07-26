@@ -64,6 +64,7 @@ const AddCommentModal = ({ open, onClose, gameId }: AddCommentModalProps) => {
           axios.put(`${gameLink}addComment/${gameId}`, {
             commentId: response._id,
           });
+          setDescription("");
           onClose();
           navigate(`/game/${gameId}`);
         });

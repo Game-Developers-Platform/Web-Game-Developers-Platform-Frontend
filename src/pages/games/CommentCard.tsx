@@ -18,7 +18,6 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
-import { useNavigate } from "react-router-dom";
 
 const CommentCard = ({
   userId,
@@ -35,7 +34,7 @@ const CommentCard = ({
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [writerName, setWriterName] = useState("");
 
-  const navigate = useNavigate();
+  const isMyComment = localStorage.getItem("userId") === String(userId);
 
   const handleOpenEditModal = () => setEditModalOpen(true);
   const handleCloseEditModal = () => setEditModalOpen(false);
@@ -64,7 +63,7 @@ const CommentCard = ({
             commentId: response._id,
           });
           handleCloseDeleteDialog();
-          navigate(`/game/${gameId}`);
+          window.location.reload();
         });
     } catch (error) {
       console.error("Delete comment failed:", error);
@@ -106,22 +105,24 @@ const CommentCard = ({
           {description}
         </Typography>
       </CardContent>
-      <CardActions sx={{ justifyContent: "space-between" }}>
-        <Button
-          sx={{ color: muiTheme.palette.text.details }}
-          size="small"
-          onClick={handleOpenEditModal}
-        >
-          Edit Comment
-        </Button>
-        <Button
-          sx={{ color: muiTheme.palette.text.details }}
-          size="small"
-          onClick={handleOpenDeleteDialog}
-        >
-          Delete Comment
-        </Button>
-      </CardActions>
+      {isMyComment && (
+        <CardActions sx={{ justifyContent: "space-between" }}>
+          <Button
+            sx={{ color: muiTheme.palette.text.details }}
+            size="small"
+            onClick={handleOpenEditModal}
+          >
+            Edit Comment
+          </Button>
+          <Button
+            sx={{ color: muiTheme.palette.text.details }}
+            size="small"
+            onClick={handleOpenDeleteDialog}
+          >
+            Delete Comment
+          </Button>
+        </CardActions>
+      )}
       {isEditModalOpen && (
         <EditCommentModal
           open={isEditModalOpen}

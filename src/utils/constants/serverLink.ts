@@ -1,4 +1,4 @@
-export const serverLink: string = "https://193.106.55.163:443/";
+export const serverLink: string = "http://node03.cs.colman.ac.il/";
 export const authLink: string = serverLink + "auth/";
 export const gameLink: string = serverLink + "games/";
 export const userLink: string = serverLink + "users/";
