@@ -18,6 +18,8 @@ import axios from "axios";
 import { userLink, fileLink } from "../utils/constants/serverLink";
 import { useNavigate } from "react-router-dom";
 import { IUser } from "../utils/types/types";
+import { getPlatformRegex } from "../utils/constants/regex";
+import { validateUrl } from "../utils/validations/validations";
 
 interface EditProfileModalProps {
   open: boolean;
@@ -38,8 +40,11 @@ const ModalContent = styled(Box)(({ theme }) => ({
   borderRadius: theme.shape.borderRadius,
   display: "flex",
   flexDirection: "column",
-  width: "40%",
+  width: "30%",
   maxWidth: "90vw",
+  maxHeight: "80vh",
+  overflowY: "auto",
+  overflowX: "hidden",
   margin: "auto",
 }));
 
@@ -63,15 +68,79 @@ const EditUserModal = ({ open, onClose, user }: EditProfileModalProps) => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
 
-  const [name, setName] = useState("");
-  const [birthDate, setBirthDate] = useState("");
-  const [socialNetworks, setSocialNetworks] = useState<
-    { platform: string; url: string }[]
-  >([]);
+  const [name, setName] = useState(user.name || "");
+  const [birthDate, setBirthDate] = useState(
+    user.birthDate ? new Date(user.birthDate).toISOString().split("T")[0] : ""
+  );
+  const [socialNetworks, setSocialNetworks] = useState(
+    user.socialNetworks || []
+  );
 
   const [selectedPlatform, setSelectedPlatform] = useState<string>("");
 
+  const [errors, setErrors] = useState({
+    name: "",
+    birthDate: "",
+    socialNetworks: [] as { platform: string; url: string }[],
+  });
+
+  const validateForm = () => {
+    const newErrors = {
+      name: "",
+      birthDate: "",
+      socialNetworks: [] as { platform: string; url: string }[],
+    };
+
+    let isValid = true;
+
+    if (name.trim() === "" || name.length < 2 || name.length > 40) {
+      newErrors.name = "Name must be between 2 and 40 characters";
+      isValid = false;
+    }
+
+    if (birthDate.trim() !== "" && isNaN(Date.parse(birthDate))) {
+      newErrors.birthDate = "Valid Birth Date is required.";
+      isValid = false;
+    }
+
+    if (socialNetworks.length > 0) {
+      newErrors.socialNetworks = socialNetworks
+        .map((network) => {
+          const validationError = validateUrl(
+            network.url,
+            getPlatformRegex(network.platform),
+            network.platform
+          );
+          return validationError !== ""
+            ? {
+                platform: network.platform,
+                url: validationError,
+              }
+            : { platform: "", url: "" };
+        })
+        .filter((error) => error.url !== "");
+    }
+
+    if (newErrors.socialNetworks.length > 0) isValid = false;
+
+    if (
+      name.trim() === "" &&
+      birthDate.trim() === "" &&
+      socialNetworks.length === 0 &&
+      !fileName
+    ) {
+      onClose();
+      return false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
   const handleSubmit = async () => {
+    const isValid = validateForm();
+    if (!isValid) return;
+
     const newUser: EditUserType = {};
 
     if (fileName !== null) {
@@ -89,15 +158,22 @@ const EditUserModal = ({ open, onClose, user }: EditProfileModalProps) => {
       }
     }
 
+    const filteredNetworks = socialNetworks.filter(
+      (network) => network.url != ""
+    );
+
     if (name !== "") newUser.name = name;
     if (birthDate !== "") newUser.birthDate = new Date(birthDate);
-    if (socialNetworks.length > 0) newUser.socialNetworks = socialNetworks;
+    if (filteredNetworks.length > 0) newUser.socialNetworks = filteredNetworks;
     const token = localStorage.getItem("token") as string;
 
-    await axios.put(userLink, { token, updatedUser: newUser }).then(() => {
+    try {
+      await axios.put(userLink, { token, updatedUser: newUser });
       onClose();
       navigate(`/profile/${user._id}`);
-    });
+    } catch (error) {
+      console.error("Update failed:", error);
+    }
   };
 
   const handlePlatformChange = (
@@ -216,6 +292,8 @@ const EditUserModal = ({ open, onClose, user }: EditProfileModalProps) => {
           fullWidth
           margin="normal"
           variant="outlined"
+          error={!!errors.name}
+          helperText={errors.name}
         />
         <CustomTextField
           label="Birth Date"
@@ -229,7 +307,8 @@ const EditUserModal = ({ open, onClose, user }: EditProfileModalProps) => {
             shrink: true,
             style: { color: muiTheme.palette.text.secondary },
           }}
-          sx={{ color: muiTheme.palette.text.secondary }}
+          error={!!errors.birthDate}
+          helperText={errors.birthDate}
         />
         <CustomTextField
           select
@@ -256,31 +335,33 @@ const EditUserModal = ({ open, onClose, user }: EditProfileModalProps) => {
                 key={platformLink.platform}
                 label={`${platformLink.platform} URL`}
                 value={platformLink.url}
-                onChange={(e) =>
-                  handlePlatformUrlChange(index, e.target.value as string)
-                }
+                onChange={(e) => handlePlatformUrlChange(index, e.target.value)}
                 fullWidth
                 margin="normal"
                 variant="outlined"
                 InputLabelProps={{
                   style: { color: muiTheme.palette.text.secondary },
                 }}
+                error={
+                  !!errors.socialNetworks.find(
+                    (network) => network.platform === platformLink.platform
+                  )
+                }
+                helperText={
+                  errors.socialNetworks.find(
+                    (network) => network.platform === platformLink.platform
+                  )?.url
+                }
               />
             )
         )}
         <Button
           onClick={handleSubmit}
-          sx={{
-            backgroundColor: muiTheme.palette.primary.light,
-            color: muiTheme.palette.primary.contrastText,
-            borderRadius: "8px",
-            "&:hover": {
-              backgroundColor: muiTheme.palette.text.hover,
-            },
-            marginTop: "1rem",
-          }}
+          variant="contained"
+          color="primary"
+          sx={{ marginTop: 2 }}
         >
-          Submit
+          Save Changes
         </Button>
       </ModalContent>
     </Modal>

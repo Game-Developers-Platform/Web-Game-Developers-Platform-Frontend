@@ -23,6 +23,10 @@ const FlexedBox = styled(Box)(({ theme }) => ({
   marginTop: theme.spacing(3),
 }));
 
+const TransitionGridItem = styled(Grid)(() => ({
+  transition: "all 0.4s ease-in-out",
+}));
+
 const MyGamesPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const { userId } = useParams();
@@ -118,17 +122,17 @@ const MyGamesPage = () => {
           sx={{ maxWidth: "85rem" }}
         >
           {filteredGames.map((gameData) => (
-            <Grid
+            <TransitionGridItem
               xs={12}
               sm={6}
               md={4}
-              lg={4}
+              lg={3}
               item
               key={gameData._id}
               sx={{ display: "flex", justifyContent: "center" }}
             >
               <GameCard {...gameData} />
-            </Grid>
+            </TransitionGridItem>
           ))}
         </Grid>
       </FlexedBox>

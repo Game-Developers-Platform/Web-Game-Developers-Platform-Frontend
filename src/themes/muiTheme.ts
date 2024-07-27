@@ -11,6 +11,7 @@ declare module "@mui/material/styles" {
     details: string;
     delete: string;
     deleteHover: string;
+    modal: string;
   }
 }
 
@@ -35,7 +36,7 @@ const theme = createTheme({
       link: "#76ABAE",
       hover: "#416263",
       details: "#76ABAE",
-      delete: "#b5142e",
+      delete: "#8c0a1f",
       deleteHover: "#5e0513",
     },
   },

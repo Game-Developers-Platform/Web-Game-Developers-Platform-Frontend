@@ -17,8 +17,7 @@ import muiTheme from "../../themes/muiTheme";
 import { IGame } from "../../utils/types/types";
 import axios from "axios";
 import { gameLink } from "../../utils/constants/serverLink";
-
-const categories = ["action", "adventure", "RPG", "strategy"];
+import { supportedCategories } from "../../utils/constants/supportedOptions";
 
 const FlexedBox = styled(Box)(({ theme }) => ({
   display: "flex",
@@ -33,6 +32,10 @@ const FiltersBox = styled(Box)(({ theme }) => ({
   flexWrap: "wrap",
   gap: theme.spacing(1),
   marginBottom: theme.spacing(2),
+}));
+
+const TransitionGridItem = styled(Grid)(() => ({
+  transition: "all 0.4s ease-in-out",
 }));
 
 const HomePage = () => {
@@ -88,6 +91,13 @@ const HomePage = () => {
     );
   });
 
+  const filteredCategories = supportedCategories.filter(
+    (category) =>
+      !filters.includes(
+        category.charAt(0).toUpperCase() + category.slice(1).toLowerCase()
+      )
+  );
+
   return (
     games && (
       <Box sx={{ flexGrow: 1, padding: 2 }}>
@@ -98,6 +108,8 @@ const HomePage = () => {
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
+              marginBottom: "1rem",
+              marginTop: "1rem",
             }}
             xs={12}
             md={6}
@@ -143,6 +155,7 @@ const HomePage = () => {
               justifyContent: "center",
               alignItems: "center",
               marginBottom: "1rem",
+              marginTop: "1rem",
             }}
             xs={12}
             md={6}
@@ -156,6 +169,9 @@ const HomePage = () => {
               displayEmpty
               MenuProps={{
                 PaperProps: {
+                  style: {
+                    height: "12rem",
+                  },
                   sx: {
                     "& .MuiList-root": {
                       backgroundColor: muiTheme.palette.text.secondary,
@@ -178,7 +194,7 @@ const HomePage = () => {
               <MenuItem value="" disabled>
                 Select Category
               </MenuItem>
-              {categories.map((category) => {
+              {filteredCategories.map((category) => {
                 const categoryName =
                   category.charAt(0).toUpperCase() +
                   category.slice(1).toLowerCase();
@@ -195,6 +211,7 @@ const HomePage = () => {
           {filters.map((filter) => (
             <Chip
               sx={{
+                mb: 5,
                 backgroundColor: muiTheme.palette.secondary.main,
                 color: muiTheme.palette.text.secondary,
                 "& .MuiChip-deleteIcon": {
@@ -215,20 +232,20 @@ const HomePage = () => {
             container
             rowSpacing={6}
             columnSpacing={1}
-            sx={{ maxWidth: "85rem" }}
+            sx={{ maxWidth: "85rem", mb: 3 }}
           >
             {filteredGames.map((gameData) => (
-              <Grid
+              <TransitionGridItem
                 xs={12}
                 sm={6}
                 md={4}
-                lg={4}
+                lg={3}
                 item
                 key={gameData.name}
                 sx={{ display: "flex", justifyContent: "center" }}
               >
                 <GameCard {...gameData} />
-              </Grid>
+              </TransitionGridItem>
             ))}
           </Grid>
         </FlexedBox>

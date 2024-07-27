@@ -1,19 +1,19 @@
 import { Box, Modal, Typography, Button, TextField } from "@mui/material";
 import { styled } from "@mui/system";
 import muiTheme from "../themes/muiTheme";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { commentLink } from "../utils/constants/serverLink";
+import { IGame } from "../utils/types/types";
 
 interface EditCommentModalProps {
   open: boolean;
   onClose: () => void;
   commentId: string;
+  gameId: IGame;
+  initialDescription: string;
+  onEditComplete: (updatedDescription: string) => void;
 }
-
-export type NewCommentType = {
-  description: string;
-};
 
 const ModalContent = styled(Box)(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
@@ -23,6 +23,9 @@ const ModalContent = styled(Box)(({ theme }) => ({
   flexDirection: "column",
   width: "30%",
   maxWidth: "90vw",
+  maxHeight: "80vh",
+  overflowY: "auto",
+  overflowX: "hidden",
   margin: "auto",
 }));
 
@@ -39,20 +42,41 @@ const CustomTextField = styled(TextField)(({ theme }) => ({
   },
 }));
 
-const EditCommentModal = ({
+const EditCommentModal: React.FC<EditCommentModalProps> = ({
   open,
   onClose,
   commentId,
-}: EditCommentModalProps) => {
-  const [description, setDescription] = useState("");
+  initialDescription,
+  onEditComplete,
+}) => {
+  const [description, setDescription] = useState(initialDescription);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    setError("");
+  }, [description]);
+
+  const validateDescription = () => {
+    if (description.length < 2 || description.length > 60) {
+      setError("Description must be between 2-60 characters long.");
+      return false;
+    }
+    return true;
+  };
 
   const handleSubmit = async () => {
-    try {
-      const newComment: NewCommentType = {
-        description: description,
-      };
+    if (!validateDescription()) {
+      return;
+    }
 
-      await axios.put(`${commentLink}/${commentId}`, newComment);
+    try {
+      const updatedComment = { description };
+
+      const response = await axios.put(
+        `${commentLink}/${commentId}`,
+        updatedComment
+      );
+      onEditComplete(response.data.description);
       onClose();
     } catch (error) {
       console.error("Edit comment failed:", error);
@@ -93,23 +117,46 @@ const EditCommentModal = ({
           fullWidth
           multiline
           rows={4}
-          margin="normal"
-          variant="outlined"
-        />
-        <Button
-          onClick={handleSubmit}
+          error={!!error}
+          helperText={error}
           sx={{
-            backgroundColor: muiTheme.palette.primary.light,
-            color: muiTheme.palette.primary.contrastText,
-            borderRadius: "8px",
-            "&:hover": {
-              backgroundColor: muiTheme.palette.text.hover,
-            },
-            marginTop: "1rem",
+            marginTop: 2,
+            color: muiTheme.palette.text.secondary,
+            borderColor: muiTheme.palette.text.secondary,
+          }}
+        />
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            marginTop: 2,
           }}
         >
-          Submit
-        </Button>
+          <Button
+            sx={{
+              backgroundColor: muiTheme.palette.text.delete,
+              color: muiTheme.palette.text.secondary,
+              "&:hover": {
+                backgroundColor: muiTheme.palette.text.deleteHover,
+              },
+            }}
+            onClick={onClose}
+          >
+            Cancel
+          </Button>
+          <Button
+            sx={{
+              backgroundColor: muiTheme.palette.text.details,
+              color: muiTheme.palette.text.secondary,
+              "&:hover": {
+                backgroundColor: muiTheme.palette.text.hover,
+              },
+            }}
+            onClick={handleSubmit}
+          >
+            Save
+          </Button>
+        </Box>
       </ModalContent>
     </Modal>
   );

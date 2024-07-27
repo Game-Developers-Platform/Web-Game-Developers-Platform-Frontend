@@ -7,11 +7,12 @@ import youtubeLogo from "../../assets/icons/logo-youtube.svg";
 import xLogo from "../../assets/icons/logo-x.svg";
 import githubLogo from "../../assets/icons/logo-github.svg";
 import linkedinLogo from "../../assets/icons/logo-linkedin.svg";
+import discordLogo from "../../assets/icons/logo-discord.svg";
 
 export const platformLogoMap = new Map<string, string>([
   ["Steam", steamLogo],
   ["EA", eaLogo],
-  ["EpicGames", epicGamesLogo],
+  ["Epic Games", epicGamesLogo],
   ["Xbox", xboxLogo],
 ]);
 
@@ -21,4 +22,5 @@ export const socialNetworksLogoMap = new Map<string, string>([
   ["X", xLogo],
   ["Github", githubLogo],
   ["LinkedIn", linkedinLogo],
+  ["Discord Server", discordLogo],
 ]);

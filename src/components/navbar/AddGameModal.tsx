@@ -22,11 +22,18 @@ import { useRef, useState } from "react";
 import axios from "axios";
 import { fileLink, gameLink, userLink } from "../../utils/constants/serverLink";
 import { useNavigate } from "react-router-dom";
+import { validateUrl } from "../../utils/validations/validations";
+import { getPlatformRegex } from "../../utils/constants/regex";
 
 interface AddGameModalProps {
   open: boolean;
   onClose: () => void;
 }
+
+export type PlatformLink = {
+  platform: string;
+  url: string;
+};
 
 export type NewGameType = {
   name: string;
@@ -34,10 +41,20 @@ export type NewGameType = {
   image: string;
   description: string;
   developerId: string;
-  platformLinks?: { platform: string; url: string }[];
+  platformLinks: PlatformLink[];
   releaseDate: Date;
   categories: string[];
 };
+
+interface FormErrors {
+  name: string;
+  price: string;
+  image: string;
+  description: string;
+  releaseDate: string;
+  categories: string;
+  platformLinks: { platform: string; url: string }[];
+}
 
 const ModalContent = styled(Box)(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
@@ -47,23 +64,28 @@ const ModalContent = styled(Box)(({ theme }) => ({
   flexDirection: "column",
   width: "30%",
   maxWidth: "90vw",
+  maxHeight: "80vh",
+  overflowY: "auto",
+  overflowX: "hidden",
   margin: "auto",
 }));
 
 const ImageBox = styled(Box, {
-  shouldForwardProp: (props) => props != "imageUrl",
+  shouldForwardProp: (props) => props !== "imageUrl",
 })<{ imageUrl: string | null }>(({ theme, imageUrl }) => ({
   width: "100%",
   height: 150,
   backgroundImage: `url(${imageUrl})`,
   backgroundSize: "cover",
   backgroundRepeat: "no-repeat",
+  backgroundPosition: "center",
   borderRadius: theme.shape.borderRadius,
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
   cursor: "pointer",
   border: `1px solid ${theme.palette.text.secondary}`,
+  flexShrink: 0,
 }));
 
 const CustomTextField = styled(TextField)(({ theme }) => ({
@@ -91,13 +113,91 @@ const AddGameModal = ({ open, onClose }: AddGameModalProps) => {
   const [description, setDescription] = useState("");
   const [releaseDate, setReleaseDate] = useState("");
   const [categories, setCategories] = useState<string[]>([]);
-  const [platformLinks, setPlatformLinks] = useState<
-    { platform: string; url: string }[]
-  >([]);
+  const [platformLinks, setPlatformLinks] = useState<PlatformLink[]>([]);
   const [selectedPlatform, setSelectedPlatform] = useState<string>("");
   const connectedUser = localStorage.getItem("userId");
 
+  const [errors, setErrors] = useState<FormErrors>({
+    name: "",
+    price: "",
+    image: "",
+    description: "",
+    releaseDate: "",
+    categories: "",
+    platformLinks: [] as { platform: string; url: string }[],
+  });
+
+  const validateForm = (): boolean => {
+    let isValid = true;
+    const newErrors: FormErrors = {
+      name: "",
+      price: "",
+      image: "",
+      description: "",
+      releaseDate: "",
+      categories: "",
+      platformLinks: [] as { platform: string; url: string }[],
+    };
+
+    if (gameName.length < 2 || gameName.length > 40) {
+      newErrors.name = "Game name must be between 2 and 40 characters";
+      isValid = false;
+    }
+
+    const priceValue = parseFloat(price);
+    if (isNaN(priceValue) || priceValue < 0 || priceValue > 300) {
+      newErrors.price = "Price must be between 0 and 300";
+      isValid = false;
+    }
+
+    if (!fileName) {
+      newErrors.image = "An image is required";
+      isValid = false;
+    }
+
+    if (description.length < 10 || description.length > 300) {
+      newErrors.description =
+        "Description must be between 10 and 300 characters";
+      isValid = false;
+    }
+
+    if (!releaseDate) {
+      newErrors.releaseDate = "Release date is required";
+      isValid = false;
+    }
+
+    if (categories.length === 0) {
+      newErrors.categories = "At least one category is required";
+      isValid = false;
+    }
+
+    if (platformLinks.length > 0) {
+      newErrors.platformLinks = platformLinks
+        .map((platform) => {
+          const validationError = validateUrl(
+            platform.url,
+            getPlatformRegex(platform.platform),
+            platform.platform
+          );
+          return validationError !== ""
+            ? {
+                platform: platform.platform,
+                url: validationError,
+              }
+            : { platform: "", url: "" };
+        })
+        .filter((error) => error.url !== "");
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
   const handleSubmit = async () => {
+    if (!validateForm()) {
+      return;
+    }
+
     try {
       const imageData = new FormData();
       imageData.append("file", fileName as Blob);
@@ -144,7 +244,9 @@ const AddGameModal = ({ open, onClose }: AddGameModalProps) => {
   const handleCategoryChange = (
     event: React.ChangeEvent<{ value: unknown }>
   ) => {
-    setCategories(event.target.value as string[]);
+    const value = event.target.value as string[];
+    setCategories(value);
+    setErrors({ ...errors, categories: "" });
   };
 
   const handlePlatformChange = (
@@ -178,9 +280,9 @@ const AddGameModal = ({ open, onClose }: AddGameModalProps) => {
     const file = event.target.files?.[0];
     if (file) {
       setFileName(file);
-
       const url = URL.createObjectURL(file);
       setImageUrl(url);
+      setErrors({ ...errors, image: "" });
     }
   };
 
@@ -217,120 +319,129 @@ const AddGameModal = ({ open, onClose }: AddGameModalProps) => {
         </IconButton>
         <Typography
           sx={{ color: muiTheme.palette.text.secondary }}
-          variant="h6"
-          component="h2"
+          variant="h5"
+          align="center"
+          gutterBottom
         >
-          Add New Game
+          Add a New Game
         </Typography>
         <ImageBox imageUrl={imageUrl} onClick={handleIconClick}>
           {!imageUrl && (
-            <AddAPhotoIcon sx={{ color: muiTheme.palette.text.secondary }} />
+            <>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                ref={fileInputRef}
+                style={{ display: "none" }}
+              />
+              <AddAPhotoIcon
+                sx={{
+                  fontSize: "4rem",
+                  color: muiTheme.palette.text.secondary,
+                }}
+              />
+            </>
           )}
         </ImageBox>
-        <input
-          type="file"
-          accept="image/*"
-          ref={fileInputRef}
-          style={{ display: "none" }}
-          onChange={handleFileChange}
-        />
+        {errors.image && (
+          <Typography color="error" variant="body2" align="center">
+            {errors.image}
+          </Typography>
+        )}
         <CustomTextField
           label="Game Name"
-          value={gameName}
-          onChange={(e) => setGameName(e.target.value)}
           fullWidth
+          value={gameName}
+          onChange={(e) => {
+            setGameName(e.target.value);
+            setErrors({ ...errors, name: "" });
+          }}
+          error={Boolean(errors.name)}
+          helperText={errors.name}
           margin="normal"
-          variant="outlined"
         />
         <CustomTextField
           label="Price"
-          value={price}
-          onChange={(e) => setPrice(e.target.value)}
+          type="number"
           fullWidth
+          value={price}
+          onChange={(e) => {
+            setPrice(e.target.value);
+            setErrors({ ...errors, price: "" });
+          }}
+          error={Boolean(errors.price)}
+          helperText={errors.price}
           margin="normal"
-          variant="outlined"
         />
         <CustomTextField
           label="Description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
           fullWidth
           multiline
-          rows={4}
+          minRows={4}
+          maxRows={6}
+          value={description}
+          onChange={(e) => {
+            setDescription(e.target.value);
+            setErrors({ ...errors, description: "" });
+          }}
+          error={Boolean(errors.description)}
+          helperText={errors.description}
           margin="normal"
-          variant="outlined"
         />
         <CustomTextField
           label="Release Date"
           type="date"
-          value={releaseDate}
-          onChange={(e) => setReleaseDate(e.target.value)}
           fullWidth
-          margin="normal"
-          variant="outlined"
           InputLabelProps={{
             shrink: true,
-            style: { color: muiTheme.palette.text.secondary },
           }}
-          sx={{ color: muiTheme.palette.text.secondary }}
+          value={releaseDate}
+          onChange={(e) => {
+            setReleaseDate(e.target.value);
+            setErrors({ ...errors, releaseDate: "" });
+          }}
+          error={Boolean(errors.releaseDate)}
+          helperText={errors.releaseDate}
+          margin="normal"
         />
-        <CustomTextField
+        <TextField
           select
-          label="Categories"
+          label="Category"
+          fullWidth
           value={categories}
           onChange={handleCategoryChange}
-          fullWidth
+          error={Boolean(errors.categories)}
+          helperText={errors.categories}
           margin="normal"
-          variant="outlined"
           SelectProps={{
             multiple: true,
             renderValue: (selected) => (selected as string[]).join(", "),
-            MenuProps: {
-              PaperProps: {
-                style: {
-                  display: "flex",
-                  flexWrap: "wrap",
-                  justifyContent: "left",
-                  backgroundColor: muiTheme.palette.primary.main,
-                  color: muiTheme.palette.text.secondary,
-                  height: "11rem",
-                },
-              },
-            },
           }}
-          InputLabelProps={{
-            style: { color: muiTheme.palette.text.secondary },
+          InputProps={{
+            style: {
+              color: muiTheme.palette.text.secondary,
+            },
           }}
         >
           {supportedCategories.map((category) => (
-            <MenuItem
-              key={category}
-              value={category}
-              style={{ padding: "8px 16px" }}
-            >
-              <Checkbox
-                checked={categories.includes(category)}
-                style={{ color: muiTheme.palette.text.secondary }}
-              />
-              <ListItemText
-                primary={category}
-                primaryTypographyProps={{
-                  style: { color: muiTheme.palette.text.secondary },
-                }}
-              />
+            <MenuItem key={category} value={category}>
+              <Checkbox checked={categories.indexOf(category) > -1} />
+              <ListItemText primary={category} />
             </MenuItem>
           ))}
-        </CustomTextField>
-        <CustomTextField
+        </TextField>
+        <TextField
           select
-          label="Select Platform"
+          label="Platform"
+          fullWidth
           value={selectedPlatform}
           onChange={handlePlatformChange}
-          fullWidth
           margin="normal"
-          variant="outlined"
-          InputLabelProps={{
-            style: { color: muiTheme.palette.text.secondary },
+          InputProps={{
+            style: {
+              color: muiTheme.palette.text.secondary,
+            },
           }}
         >
           {supportedPlatforms.map((platform) => (
@@ -338,36 +449,36 @@ const AddGameModal = ({ open, onClose }: AddGameModalProps) => {
               {platform}
             </MenuItem>
           ))}
-        </CustomTextField>
-        {platformLinks.map(
-          (platformLink, index) =>
-            platformLink.platform === selectedPlatform && (
-              <CustomTextField
-                key={platformLink.platform}
-                label={`${platformLink.platform} URL`}
-                value={platformLink.url}
-                onChange={(e) =>
-                  handlePlatformUrlChange(index, e.target.value as string)
-                }
-                fullWidth
-                margin="normal"
-                variant="outlined"
-                InputLabelProps={{
-                  style: { color: muiTheme.palette.text.secondary },
-                }}
-              />
-            )
-        )}
+        </TextField>
+        {platformLinks.map((link, index) => (
+          <CustomTextField
+            key={index}
+            label={`${link.platform} URL`}
+            fullWidth
+            value={link.url}
+            onChange={(e) => handlePlatformUrlChange(index, e.target.value)}
+            margin="normal"
+            error={
+              !!errors.platformLinks.find(
+                (platform) => platform.platform === link.platform
+              )
+            }
+            helperText={
+              errors.platformLinks.find(
+                (platform) => platform.platform === link.platform
+              )?.url
+            }
+          />
+        ))}
         <Button
           onClick={handleSubmit}
           sx={{
-            backgroundColor: muiTheme.palette.primary.light,
-            color: muiTheme.palette.primary.contrastText,
-            borderRadius: "8px",
+            marginTop: 2,
+            backgroundColor: muiTheme.palette.background.default,
+            color: muiTheme.palette.text.secondary,
             "&:hover": {
               backgroundColor: muiTheme.palette.text.hover,
             },
-            marginTop: "1rem",
           }}
         >
           Submit

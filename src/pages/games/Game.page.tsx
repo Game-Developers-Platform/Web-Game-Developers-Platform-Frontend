@@ -165,6 +165,7 @@ const GamePage = () => {
         />
         <Box
           sx={{
+            maxWidth: { xs: 300, sm: 400, md: 450, lg: 450 },
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
@@ -276,7 +277,28 @@ const GamePage = () => {
           <Box sx={{ display: "flex", alignItems: "center", marginBottom: 2 }}>
             <FormControl
               variant="outlined"
-              sx={{ minWidth: 80, marginRight: 5 }}
+              sx={{
+                minWidth: 115,
+                marginRight: 5,
+                "& .MuiFormLabel-root": {
+                  color: muiTheme.palette.text.secondary,
+                },
+                "& .MuiFormLabel-root.Mui-focused": {
+                  color: muiTheme.palette.text.secondary,
+                },
+                "& .MuiOutlinedInput-root": {
+                  height: 40,
+                  "& fieldset": {
+                    borderColor: muiTheme.palette.text.primary,
+                  },
+                  "&:hover fieldset": {
+                    borderColor: muiTheme.palette.text.primary,
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: muiTheme.palette.text.primary,
+                  },
+                },
+              }}
             >
               <InputLabel id="currency-select-label">Currency</InputLabel>
               <Select
@@ -298,36 +320,58 @@ const GamePage = () => {
                   },
                 }}
                 sx={{
+                  height: 40,
                   "& .MuiSelect-select": {
-                    height: 16,
+                    height: "100%",
                     display: "flex",
                     alignItems: "center",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
                   },
+                  "& .MuiSelect-icon": {
+                    color: muiTheme.palette.text.secondary,
+                  },
+                  width: "115px",
                 }}
               >
                 {currencies.map((currency) => (
                   <MenuItem
                     key={currency.name}
                     value={currency.name}
-                    style={{ padding: "8px 16px" }}
+                    style={{
+                      padding: "8px 16px",
+                      textAlign: "center",
+                    }}
                   >
                     <ListItemText
                       primary={currency.name}
                       primaryTypographyProps={{
-                        style: { color: muiTheme.palette.text.secondary },
+                        style: {
+                          color: muiTheme.palette.text.secondary,
+                          textAlign: "center",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        },
                       }}
                     />
                   </MenuItem>
                 ))}
               </Select>
             </FormControl>
+
             {selectedCurrency && (
               <Typography
                 sx={{
                   color: muiTheme.palette.text.secondary,
+                  border: `1px solid ${muiTheme.palette.text.primary}`,
+                  borderRadius: 1,
+                  padding: "4px 8px",
+                  textAlign: "center",
+                  marginLeft: 2,
+                  lineHeight: "24px",
                 }}
               >
-                {convertedPrice}
+                {convertedPrice.toFixed(2)} {selectedCurrency}
               </Typography>
             )}
           </Box>
@@ -359,7 +403,7 @@ const GamePage = () => {
                   <img
                     src={platformLogoMap.get(platformLink.platform)}
                     alt={platformLink.platform}
-                    style={{ width: 32, height: 32 }}
+                    style={{ width: 38, height: 38 }}
                   />
                 </IconButton>
               ))}
@@ -393,36 +437,36 @@ const GamePage = () => {
           >
             {game.developerId?.name}
           </Typography>
-          <Button
-            variant="contained"
-            sx={{
-              marginTop: "1rem",
-              backgroundColor: muiTheme.palette.background.default,
-              color: muiTheme.palette.text.secondary,
-              "&:hover": {
-                backgroundColor: muiTheme.palette.text.hover,
-              },
-            }}
-            onClick={handleProfileClick}
-          >
-            {isMyGame ? "My Profile" : "Developer's Profile"}
-          </Button>
-          {!isMyGame && (
+          <Box sx={{ display: "flex", gap: 2, marginTop: "1rem" }}>
             <Button
               variant="contained"
               sx={{
-                mt: 2,
                 backgroundColor: muiTheme.palette.background.default,
                 color: muiTheme.palette.text.secondary,
                 "&:hover": {
                   backgroundColor: muiTheme.palette.text.hover,
                 },
               }}
-              onClick={handleCommentModalOpen}
+              onClick={handleProfileClick}
             >
-              Add Comment
+              {isMyGame ? "My Profile" : "Developer's Profile"}
             </Button>
-          )}
+            {!isMyGame && (
+              <Button
+                variant="contained"
+                sx={{
+                  backgroundColor: muiTheme.palette.background.default,
+                  color: muiTheme.palette.text.secondary,
+                  "&:hover": {
+                    backgroundColor: muiTheme.palette.text.hover,
+                  },
+                }}
+                onClick={handleCommentModalOpen}
+              >
+                Add Comment
+              </Button>
+            )}
+          </Box>
           {isMyGame && (
             <Box sx={{ display: "flex", gap: 2, marginTop: "1rem" }}>
               <Button
@@ -459,14 +503,15 @@ const GamePage = () => {
             variant="h5"
             sx={{
               color: muiTheme.palette.text.secondary,
-              marginBottom: 0.5,
+              marginBottom: 2,
+              marginTop: 2,
             }}
           >
             Comments
           </Typography>
         )}
         {game.comments?.length > 0 && (
-          <FlexedBox sx={{ width: "100%" }}>
+          <FlexedBox sx={{ width: "100%", mb: 3 }}>
             <Grid
               container
               rowSpacing={6}

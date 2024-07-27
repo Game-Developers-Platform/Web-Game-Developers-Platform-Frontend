@@ -23,6 +23,8 @@ import axios from "axios";
 import { gameLink, fileLink } from "../utils/constants/serverLink";
 import { useNavigate } from "react-router-dom";
 import { IGame } from "../utils/types/types";
+import { validateUrl } from "../utils/validations/validations";
+import { getPlatformRegex } from "../utils/constants/regex";
 
 interface EditGameModalProps {
   open: boolean;
@@ -46,25 +48,30 @@ const ModalContent = styled(Box)(({ theme }) => ({
   borderRadius: theme.shape.borderRadius,
   display: "flex",
   flexDirection: "column",
-  width: "40%",
+  width: "30%",
   maxWidth: "90vw",
+  maxHeight: "80vh",
+  overflowY: "auto",
+  overflowX: "hidden",
   margin: "auto",
 }));
 
 const ImageBox = styled(Box, {
-  shouldForwardProp: (props) => props != "imageUrl",
+  shouldForwardProp: (props) => props !== "imageUrl",
 })<{ imageUrl: string | null }>(({ theme, imageUrl }) => ({
   width: "100%",
   height: 150,
   backgroundImage: `url(${imageUrl})`,
   backgroundSize: "cover",
   backgroundRepeat: "no-repeat",
+  backgroundPosition: "center",
   borderRadius: theme.shape.borderRadius,
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
   cursor: "pointer",
   border: `1px solid ${theme.palette.text.secondary}`,
+  flexShrink: 0,
 }));
 
 const CustomTextField = styled(TextField)(({ theme }) => ({
@@ -87,19 +94,112 @@ const EditGameModal = ({ open, onClose, game }: EditGameModalProps) => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
 
-  const [gameName, setGameName] = useState("");
-  const [price, setPrice] = useState("");
-  const [description, setDescription] = useState("");
-  const [releaseDate, setReleaseDate] = useState("");
-  const [categories, setCategories] = useState<string[]>([]);
+  const [gameName, setGameName] = useState(game.name || "");
+  const [price, setPrice] = useState(game.price?.toString() || "");
+  const [description, setDescription] = useState(game.description || "");
+  const [releaseDate, setReleaseDate] = useState(
+    game.releaseDate
+      ? new Date(game.releaseDate).toISOString().split("T")[0]
+      : ""
+  );
+  const [categories, setCategories] = useState<string[]>(game.categories || []);
   const [platformLinks, setPlatformLinks] = useState<
     { platform: string; url: string }[]
-  >([]);
+  >(game.platformLinks || []);
   const [selectedPlatform, setSelectedPlatform] = useState<string>("");
-  const connectedUser = localStorage.getItem("userId");
+
+  const [errors, setErrors] = useState({
+    gameName: "",
+    price: "",
+    description: "",
+    releaseDate: "",
+    platformLinks: [] as { platform: string; url: string }[],
+  });
+
+  const validateForm = () => {
+    const newErrors = {
+      gameName: "",
+      price: "",
+      description: "",
+      releaseDate: "",
+      platformLinks: [] as { platform: string; url: string }[],
+    };
+
+    let isValid = true;
+
+    if (
+      gameName.trim() !== "" &&
+      (gameName.length < 2 || gameName.length > 40)
+    ) {
+      newErrors.gameName = "Game name must be between 2 and 40 characters";
+      isValid = false;
+    }
+
+    if (
+      price.trim() !== "" &&
+      (isNaN(parseFloat(price)) ||
+        parseFloat(price) <= 0 ||
+        parseFloat(price) > 300)
+    ) {
+      newErrors.price = "Price must be between 0 and 300";
+      isValid = false;
+    }
+
+    if (
+      description.trim() !== "" &&
+      (description.length < 10 || description.length > 300)
+    ) {
+      newErrors.description =
+        "Description must be between 10 and 300 characters";
+      isValid = false;
+    }
+
+    if (releaseDate.trim() !== "" && isNaN(Date.parse(releaseDate))) {
+      newErrors.releaseDate = "Valid Release Date is required.";
+      isValid = false;
+    }
+
+    if (platformLinks.length > 0) {
+      newErrors.platformLinks = platformLinks
+        .map((platform) => {
+          const validationError = validateUrl(
+            platform.url,
+            getPlatformRegex(platform.platform),
+            platform.platform
+          );
+          return validationError !== ""
+            ? {
+                platform: platform.platform,
+                url: validationError,
+              }
+            : { platform: "", url: "" };
+        })
+        .filter((error) => error.url !== "");
+    }
+
+    if (newErrors.platformLinks.length > 0) isValid = false;
+
+    if (
+      gameName.trim() === "" &&
+      price.trim() === "" &&
+      description.trim() === "" &&
+      releaseDate.trim() === "" &&
+      categories.length === 0 &&
+      platformLinks.length === 0
+    ) {
+      onClose();
+      return false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
 
   const handleSubmit = async () => {
-    const newGame: EditGameType = {};
+    const isValid = validateForm();
+    if (!isValid) return;
+
+    const updatedGame: EditGameType = {};
 
     if (fileName !== null) {
       try {
@@ -110,23 +210,28 @@ const EditGameModal = ({ open, onClose, game }: EditGameModalProps) => {
             "Content-Type": "multipart/form-data",
           },
         });
-        newGame.image = uploadResponse.data.file;
+        updatedGame.image = uploadResponse.data.file;
       } catch (error) {
         console.error("File upload failed:", error);
       }
     }
 
-    if (gameName !== "") newGame.name = gameName;
-    if (price !== "") newGame.price = parseFloat(price);
-    if (description !== "") newGame.description = description;
-    if (releaseDate !== "") newGame.releaseDate = new Date(releaseDate);
-    if (categories.length > 0) newGame.categories = categories;
-    if (platformLinks.length > 0) newGame.platformLinks = platformLinks;
+    if (gameName !== "") updatedGame.name = gameName;
+    if (price !== "" && !isNaN(parseFloat(price)))
+      updatedGame.price = parseFloat(price);
+    if (description !== "") updatedGame.description = description;
+    if (releaseDate !== "" && !isNaN(Date.parse(releaseDate)))
+      updatedGame.releaseDate = new Date(releaseDate);
+    if (categories.length > 0) updatedGame.categories = categories;
+    if (platformLinks.length > 0) updatedGame.platformLinks = platformLinks;
 
-    await axios.put(`${gameLink}${game._id}`, newGame).then(() => {
+    try {
+      await axios.put(`${gameLink}${game._id}`, updatedGame);
       onClose();
-      navigate(`/myGames/${connectedUser}`);
-    });
+      navigate(`/myGames/${localStorage.getItem("userId")}`);
+    } catch (error) {
+      console.error("Failed to update game:", error);
+    }
   };
 
   const handleCategoryChange = (
@@ -222,6 +327,8 @@ const EditGameModal = ({ open, onClose, game }: EditGameModalProps) => {
           fullWidth
           margin="normal"
           variant="outlined"
+          error={!!errors.gameName}
+          helperText={errors.gameName}
         />
         <CustomTextField
           label="Price"
@@ -230,20 +337,25 @@ const EditGameModal = ({ open, onClose, game }: EditGameModalProps) => {
           fullWidth
           margin="normal"
           variant="outlined"
+          type="text"
+          error={!!errors.price}
+          helperText={errors.price}
         />
         <CustomTextField
+          multiline
+          rows={4}
           label="Description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           fullWidth
-          multiline
-          rows={4}
           margin="normal"
           variant="outlined"
+          error={!!errors.description}
+          helperText={errors.description}
         />
         <CustomTextField
-          label="Release Date"
           type="date"
+          label="Release Date"
           value={releaseDate}
           onChange={(e) => setReleaseDate(e.target.value)}
           fullWidth
@@ -253,7 +365,8 @@ const EditGameModal = ({ open, onClose, game }: EditGameModalProps) => {
             shrink: true,
             style: { color: muiTheme.palette.text.secondary },
           }}
-          sx={{ color: muiTheme.palette.text.secondary }}
+          error={!!errors.releaseDate}
+          helperText={errors.releaseDate}
         />
         <CustomTextField
           select
@@ -284,21 +397,12 @@ const EditGameModal = ({ open, onClose, game }: EditGameModalProps) => {
           }}
         >
           {supportedCategories.map((category) => (
-            <MenuItem
-              key={category}
-              value={category}
-              style={{ padding: "8px 16px" }}
-            >
+            <MenuItem key={category} value={category}>
               <Checkbox
                 checked={categories.includes(category)}
-                style={{ color: muiTheme.palette.text.secondary }}
+                sx={{ color: muiTheme.palette.text.secondary }}
               />
-              <ListItemText
-                primary={category}
-                primaryTypographyProps={{
-                  style: { color: muiTheme.palette.text.secondary },
-                }}
-              />
+              <ListItemText primary={category} />
             </MenuItem>
           ))}
         </CustomTextField>
@@ -333,25 +437,32 @@ const EditGameModal = ({ open, onClose, game }: EditGameModalProps) => {
                 fullWidth
                 margin="normal"
                 variant="outlined"
-                InputLabelProps={{
-                  style: { color: muiTheme.palette.text.secondary },
-                }}
+                error={
+                  !!errors.platformLinks.find(
+                    (platform) => platform.platform === platformLink.platform
+                  )
+                }
+                helperText={
+                  errors.platformLinks.find(
+                    (platform) => platform.platform === platformLink.platform
+                  )?.url
+                }
               />
             )
         )}
         <Button
+          variant="contained"
           onClick={handleSubmit}
           sx={{
-            backgroundColor: muiTheme.palette.primary.light,
-            color: muiTheme.palette.primary.contrastText,
-            borderRadius: "8px",
+            marginTop: 2,
+            backgroundColor: muiTheme.palette.background.default,
+            color: muiTheme.palette.text.secondary,
             "&:hover": {
               backgroundColor: muiTheme.palette.text.hover,
             },
-            marginTop: "1rem",
           }}
         >
-          Submit
+          Save Changes
         </Button>
       </ModalContent>
     </Modal>
