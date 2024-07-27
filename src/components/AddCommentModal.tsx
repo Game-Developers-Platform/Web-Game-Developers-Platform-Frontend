@@ -3,7 +3,6 @@ import { styled } from "@mui/system";
 import muiTheme from "../themes/muiTheme";
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 import { commentLink, gameLink } from "../utils/constants/serverLink";
 
 interface AddCommentModalProps {
@@ -43,21 +42,18 @@ const CustomTextField = styled(TextField)(({ theme }) => ({
 }));
 
 const AddCommentModal = ({ open, onClose, gameId }: AddCommentModalProps) => {
-  const navigate = useNavigate();
-
   const [description, setDescription] = useState("");
   const [error, setError] = useState("");
 
   const connectedUser = localStorage.getItem("userId");
 
   useEffect(() => {
-    // Clear error when description changes
     setError("");
   }, [description]);
 
   const validateDescription = () => {
-    if (description.length < 2 || description.length > 120) {
-      setError("Description must be between 2-120 characters long.");
+    if (description.length < 2 || description.length > 60) {
+      setError("Description must be between 2-60 characters long.");
       return false;
     }
     return true;
@@ -86,7 +82,6 @@ const AddCommentModal = ({ open, onClose, gameId }: AddCommentModalProps) => {
             .then(() => {
               setDescription("");
               onClose();
-              navigate(`/game/${gameId}`);
             });
         });
     } catch (error) {

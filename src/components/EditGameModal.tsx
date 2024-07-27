@@ -23,6 +23,8 @@ import axios from "axios";
 import { gameLink, fileLink } from "../utils/constants/serverLink";
 import { useNavigate } from "react-router-dom";
 import { IGame } from "../utils/types/types";
+import { validateUrl } from "../utils/validations/validations";
+import { getPlatformRegex } from "../utils/constants/regex";
 
 interface EditGameModalProps {
   open: boolean;
@@ -111,7 +113,7 @@ const EditGameModal = ({ open, onClose, game }: EditGameModalProps) => {
     price: "",
     description: "",
     releaseDate: "",
-    platformLinks: "",
+    platformLinks: [] as { platform: string; url: string }[],
   });
 
   const validateForm = () => {
@@ -120,7 +122,7 @@ const EditGameModal = ({ open, onClose, game }: EditGameModalProps) => {
       price: "",
       description: "",
       releaseDate: "",
-      platformLinks: "",
+      platformLinks: [] as { platform: string; url: string }[],
     };
 
     let isValid = true;
@@ -157,10 +159,25 @@ const EditGameModal = ({ open, onClose, game }: EditGameModalProps) => {
       isValid = false;
     }
 
-    if (platformLinks.some((link) => link.url.trim() === "")) {
-      newErrors.platformLinks = "All chosen platform URLs must be provided.";
-      isValid = false;
+    if (platformLinks.length > 0) {
+      newErrors.platformLinks = platformLinks
+        .map((platform) => {
+          const validationError = validateUrl(
+            platform.url,
+            getPlatformRegex(platform.platform),
+            platform.platform
+          );
+          return validationError !== ""
+            ? {
+                platform: platform.platform,
+                url: validationError,
+              }
+            : { platform: "", url: "" };
+        })
+        .filter((error) => error.url !== "");
     }
+
+    if (newErrors.platformLinks.length > 0) isValid = false;
 
     if (
       gameName.trim() === "" &&
@@ -420,8 +437,16 @@ const EditGameModal = ({ open, onClose, game }: EditGameModalProps) => {
                 fullWidth
                 margin="normal"
                 variant="outlined"
-                error={!!errors.platformLinks}
-                helperText={errors.platformLinks}
+                error={
+                  !!errors.platformLinks.find(
+                    (platform) => platform.platform === platformLink.platform
+                  )
+                }
+                helperText={
+                  errors.platformLinks.find(
+                    (platform) => platform.platform === platformLink.platform
+                  )?.url
+                }
               />
             )
         )}

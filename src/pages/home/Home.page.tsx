@@ -232,7 +232,7 @@ const HomePage = () => {
             container
             rowSpacing={6}
             columnSpacing={1}
-            sx={{ maxWidth: "85rem" }}
+            sx={{ maxWidth: "85rem", mb: 3 }}
           >
             {filteredGames.map((gameData) => (
               <TransitionGridItem

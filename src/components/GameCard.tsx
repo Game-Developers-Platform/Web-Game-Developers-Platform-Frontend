@@ -91,6 +91,13 @@ const GameCard = ({
           sx={{
             color: muiTheme.palette.text.button,
             textTransform: "none",
+            transition: "transform 0.3s ease",
+            "&:hover": {
+              transform: "translateY(-3px)",
+            },
+            fontSize: { xs: "0.9rem", sm: "1rem", md: "1.1rem" },
+            fontWeight: 400,
+            letterSpacing: ".03rem",
           }}
           size="small"
           onClick={() => navigate(`/game/${_id}`)}
@@ -101,6 +108,13 @@ const GameCard = ({
           sx={{
             color: muiTheme.palette.text.button,
             textTransform: "none",
+            transition: "transform 0.3s ease",
+            "&:hover": {
+              transform: "translateY(-3px)",
+            },
+            fontSize: { xs: "0.9rem", sm: "1rem", md: "1.1rem" },
+            fontWeight: 400,
+            letterSpacing: ".03rem",
           }}
           size="small"
           onClick={() => navigate(`/profile/${developerId._id}`)}

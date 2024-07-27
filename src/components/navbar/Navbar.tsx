@@ -227,11 +227,11 @@ const Navbar = () => {
                         width: 40,
                         height: 40,
                         borderRadius: "50%",
-                        boxShadow: `0 0 10px ${muiTheme.palette.primary.main}`, // Glowing effect
-                        transition: "all 0.3s ease", // Smooth transition for hover effects
+                        boxShadow: `0 0 10px ${muiTheme.palette.primary.main}`,
+                        transition: "all 0.3s ease",
                         "&:hover": {
-                          transform: "translateY(-5px)", // Slight upward movement on hover
-                          boxShadow: `0 0 15px ${muiTheme.palette.primary.main}`, // Enhanced glow on hover
+                          transform: "translateY(-5px)",
+                          boxShadow: `0 0 15px ${muiTheme.palette.background.default}`,
                         },
                       }}
                     />

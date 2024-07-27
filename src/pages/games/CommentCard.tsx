@@ -19,20 +19,23 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 
-const CommentCard = ({
-  userId,
-  gameId,
-  _id,
-  description,
-}: {
+interface CommentCardProps {
   userId: IUser;
   gameId: IGame;
   _id: string;
   description: string;
+}
+
+const CommentCard: React.FC<CommentCardProps> = ({
+  userId,
+  gameId,
+  _id,
+  description: initialDescription,
 }) => {
   const [isEditModalOpen, setEditModalOpen] = useState(false);
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [writerName, setWriterName] = useState("");
+  const [description, setDescription] = useState(initialDescription);
 
   const isMyComment = localStorage.getItem("userId") === String(userId);
 
@@ -70,15 +73,24 @@ const CommentCard = ({
     }
   };
 
+  const handleEditComplete = (updatedDescription: string) => {
+    setDescription(updatedDescription);
+    setEditModalOpen(false);
+  };
+
   return (
     <Card
       key={_id}
       sx={{
-        width: 550,
-        height: 200,
+        width: 200,
+        height: 175,
         display: "flex",
         flexDirection: "column",
         backgroundColor: muiTheme.palette.secondary.main,
+        borderRadius: "16px",
+        boxShadow: "0 12px 24px rgba(0, 0, 0, 0.2)",
+        overflow: "hidden",
+        transition: "box-shadow 0.3s ease-in-out, transform 0.1s ease-in-out",
       }}
     >
       <CardContent
@@ -95,10 +107,16 @@ const CommentCard = ({
           variant="h5"
           component="div"
         >
-          {writerName ? "Writer: " + writerName : "Writer Name..."}
+          {writerName ? "By: " + writerName : "Writer Name..."}
         </Typography>
         <Typography
-          sx={{ color: muiTheme.palette.text.secondary }}
+          sx={{
+            color: muiTheme.palette.text.secondary,
+            wordBreak: "break-word",
+            whiteSpace: "normal",
+            overflowWrap: "break-word",
+            width: "85%",
+          }}
           variant="body2"
           color="text.secondary"
         >
@@ -112,14 +130,14 @@ const CommentCard = ({
             size="small"
             onClick={handleOpenEditModal}
           >
-            Edit Comment
+            Edit
           </Button>
           <Button
-            sx={{ color: muiTheme.palette.text.details }}
+            sx={{ color: muiTheme.palette.text.delete }}
             size="small"
             onClick={handleOpenDeleteDialog}
           >
-            Delete Comment
+            Delete
           </Button>
         </CardActions>
       )}
@@ -128,6 +146,9 @@ const CommentCard = ({
           open={isEditModalOpen}
           onClose={handleCloseEditModal}
           commentId={_id}
+          gameId={gameId}
+          initialDescription={description}
+          onEditComplete={handleEditComplete}
         />
       )}
       <Dialog

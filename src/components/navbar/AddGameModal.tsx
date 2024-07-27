@@ -22,6 +22,8 @@ import { useRef, useState } from "react";
 import axios from "axios";
 import { fileLink, gameLink, userLink } from "../../utils/constants/serverLink";
 import { useNavigate } from "react-router-dom";
+import { validateUrl } from "../../utils/validations/validations";
+import { getPlatformRegex } from "../../utils/constants/regex";
 
 interface AddGameModalProps {
   open: boolean;
@@ -51,7 +53,7 @@ interface FormErrors {
   description: string;
   releaseDate: string;
   categories: string;
-  platformLinks: string;
+  platformLinks: { platform: string; url: string }[];
 }
 
 const ModalContent = styled(Box)(({ theme }) => ({
@@ -122,7 +124,7 @@ const AddGameModal = ({ open, onClose }: AddGameModalProps) => {
     description: "",
     releaseDate: "",
     categories: "",
-    platformLinks: "",
+    platformLinks: [] as { platform: string; url: string }[],
   });
 
   const validateForm = (): boolean => {
@@ -134,7 +136,7 @@ const AddGameModal = ({ open, onClose }: AddGameModalProps) => {
       description: "",
       releaseDate: "",
       categories: "",
-      platformLinks: "",
+      platformLinks: [] as { platform: string; url: string }[],
     };
 
     if (gameName.length < 2 || gameName.length > 40) {
@@ -167,6 +169,24 @@ const AddGameModal = ({ open, onClose }: AddGameModalProps) => {
     if (categories.length === 0) {
       newErrors.categories = "At least one category is required";
       isValid = false;
+    }
+
+    if (platformLinks.length > 0) {
+      newErrors.platformLinks = platformLinks
+        .map((platform) => {
+          const validationError = validateUrl(
+            platform.url,
+            getPlatformRegex(platform.platform),
+            platform.platform
+          );
+          return validationError !== ""
+            ? {
+                platform: platform.platform,
+                url: validationError,
+              }
+            : { platform: "", url: "" };
+        })
+        .filter((error) => error.url !== "");
     }
 
     setErrors(newErrors);
@@ -240,7 +260,6 @@ const AddGameModal = ({ open, onClose }: AddGameModalProps) => {
         { platform: platformName, url: "" },
       ]);
     }
-    setErrors({ ...errors, platformLinks: "" });
   };
 
   const handlePlatformUrlChange = (index: number, url: string) => {
@@ -249,7 +268,6 @@ const AddGameModal = ({ open, onClose }: AddGameModalProps) => {
       updatedPlatforms[index].url = url;
       return updatedPlatforms;
     });
-    setErrors({ ...errors, platformLinks: "" });
   };
 
   const handleIconClick = () => {
@@ -403,7 +421,6 @@ const AddGameModal = ({ open, onClose }: AddGameModalProps) => {
           InputProps={{
             style: {
               color: muiTheme.palette.text.secondary,
-              marginTop: "10px",
             },
           }}
         >
@@ -420,13 +437,10 @@ const AddGameModal = ({ open, onClose }: AddGameModalProps) => {
           fullWidth
           value={selectedPlatform}
           onChange={handlePlatformChange}
-          error={Boolean(errors.platformLinks)}
-          helperText={errors.platformLinks}
           margin="normal"
           InputProps={{
             style: {
               color: muiTheme.palette.text.secondary,
-              marginTop: "10px",
             },
           }}
         >
@@ -444,8 +458,16 @@ const AddGameModal = ({ open, onClose }: AddGameModalProps) => {
             value={link.url}
             onChange={(e) => handlePlatformUrlChange(index, e.target.value)}
             margin="normal"
-            error={Boolean(errors.platformLinks)}
-            helperText={errors.platformLinks}
+            error={
+              !!errors.platformLinks.find(
+                (platform) => platform.platform === link.platform
+              )
+            }
+            helperText={
+              errors.platformLinks.find(
+                (platform) => platform.platform === link.platform
+              )?.url
+            }
           />
         ))}
         <Button

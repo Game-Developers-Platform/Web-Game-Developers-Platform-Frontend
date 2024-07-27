@@ -18,6 +18,8 @@ import axios from "axios";
 import { userLink, fileLink } from "../utils/constants/serverLink";
 import { useNavigate } from "react-router-dom";
 import { IUser } from "../utils/types/types";
+import { getPlatformRegex } from "../utils/constants/regex";
+import { validateUrl } from "../utils/validations/validations";
 
 interface EditProfileModalProps {
   open: boolean;
@@ -79,14 +81,14 @@ const EditUserModal = ({ open, onClose, user }: EditProfileModalProps) => {
   const [errors, setErrors] = useState({
     name: "",
     birthDate: "",
-    socialNetworks: "",
+    socialNetworks: [] as { platform: string; url: string }[],
   });
 
   const validateForm = () => {
     const newErrors = {
       name: "",
       birthDate: "",
-      socialNetworks: "",
+      socialNetworks: [] as { platform: string; url: string }[],
     };
 
     let isValid = true;
@@ -101,13 +103,34 @@ const EditUserModal = ({ open, onClose, user }: EditProfileModalProps) => {
       isValid = false;
     }
 
+    if (socialNetworks.length > 0) {
+      newErrors.socialNetworks = socialNetworks
+        .map((network) => {
+          const validationError = validateUrl(
+            network.url,
+            getPlatformRegex(network.platform),
+            network.platform
+          );
+          return validationError !== ""
+            ? {
+                platform: network.platform,
+                url: validationError,
+              }
+            : { platform: "", url: "" };
+        })
+        .filter((error) => error.url !== "");
+    }
+
+    if (newErrors.socialNetworks.length > 0) isValid = false;
+
     if (
-      socialNetworks.some((link) => link.url.trim() === "") &&
-      socialNetworks.length > 0
+      name.trim() === "" &&
+      birthDate.trim() === "" &&
+      socialNetworks.length === 0 &&
+      !fileName
     ) {
-      newErrors.socialNetworks =
-        "All chosen social network URLs must be provided.";
-      isValid = false;
+      onClose();
+      return false;
     }
 
     setErrors(newErrors);
@@ -116,17 +139,7 @@ const EditUserModal = ({ open, onClose, user }: EditProfileModalProps) => {
 
   const handleSubmit = async () => {
     const isValid = validateForm();
-
-    if (
-      !isValid ||
-      (name.trim() === "" &&
-        birthDate.trim() === "" &&
-        socialNetworks.length === 0 &&
-        !fileName)
-    ) {
-      onClose();
-      return;
-    }
+    if (!isValid) return;
 
     const newUser: EditUserType = {};
 
@@ -145,9 +158,13 @@ const EditUserModal = ({ open, onClose, user }: EditProfileModalProps) => {
       }
     }
 
+    const filteredNetworks = socialNetworks.filter(
+      (network) => network.url != ""
+    );
+
     if (name !== "") newUser.name = name;
     if (birthDate !== "") newUser.birthDate = new Date(birthDate);
-    if (socialNetworks.length > 0) newUser.socialNetworks = socialNetworks;
+    if (filteredNetworks.length > 0) newUser.socialNetworks = filteredNetworks;
     const token = localStorage.getItem("token") as string;
 
     try {
@@ -325,8 +342,16 @@ const EditUserModal = ({ open, onClose, user }: EditProfileModalProps) => {
                 InputLabelProps={{
                   style: { color: muiTheme.palette.text.secondary },
                 }}
-                error={!!errors.socialNetworks}
-                helperText={errors.socialNetworks}
+                error={
+                  !!errors.socialNetworks.find(
+                    (network) => network.platform === platformLink.platform
+                  )
+                }
+                helperText={
+                  errors.socialNetworks.find(
+                    (network) => network.platform === platformLink.platform
+                  )?.url
+                }
               />
             )
         )}

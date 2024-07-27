@@ -503,14 +503,15 @@ const GamePage = () => {
             variant="h5"
             sx={{
               color: muiTheme.palette.text.secondary,
-              marginBottom: 0.5,
+              marginBottom: 2,
+              marginTop: 2,
             }}
           >
             Comments
           </Typography>
         )}
         {game.comments?.length > 0 && (
-          <FlexedBox sx={{ width: "100%" }}>
+          <FlexedBox sx={{ width: "100%", mb: 3 }}>
             <Grid
               container
               rowSpacing={6}
