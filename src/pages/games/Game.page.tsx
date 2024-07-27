@@ -287,7 +287,7 @@ const GamePage = () => {
                   color: muiTheme.palette.text.secondary,
                 },
                 "& .MuiOutlinedInput-root": {
-                  height: 40,
+                  height: 55,
                   "& fieldset": {
                     borderColor: muiTheme.palette.text.primary,
                   },
@@ -315,7 +315,6 @@ const GamePage = () => {
                       justifyContent: "left",
                       backgroundColor: muiTheme.palette.primary.main,
                       color: muiTheme.palette.text.secondary,
-                      height: "11rem",
                     },
                   },
                 }}

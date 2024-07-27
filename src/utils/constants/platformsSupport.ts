@@ -13,7 +13,7 @@ export const platformLogoMap = new Map<string, string>([
   ["Steam", steamLogo],
   ["EA", eaLogo],
   ["Epic Games", epicGamesLogo],
-  ["Xbox", xboxLogo],
+  ["XBox", xboxLogo],
 ]);
 
 export const socialNetworksLogoMap = new Map<string, string>([
