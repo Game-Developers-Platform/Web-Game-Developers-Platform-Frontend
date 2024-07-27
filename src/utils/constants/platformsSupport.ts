@@ -11,7 +11,7 @@ import linkedinLogo from "../../assets/icons/logo-linkedin.svg";
 export const platformLogoMap = new Map<string, string>([
   ["Steam", steamLogo],
   ["EA", eaLogo],
-  ["EpicGames", epicGamesLogo],
+  ["Epic Games", epicGamesLogo],
   ["Xbox", xboxLogo],
 ]);
 

@@ -42,6 +42,10 @@ const NavbarTitle = ({ display, variant }: NavbarTitleProps) => (
         color: "inherit",
         textDecoration: "none",
         fontSize: { xs: "1.1rem", sm: "1.5rem", md: "1.75rem", lg: "2rem" },
+        transition: "transform 0.3s ease",
+        "&:hover": {
+          transform: "translateY(-3px)",
+        },
       }}
     >
       Game-Developers-Platform
@@ -51,7 +55,6 @@ const NavbarTitle = ({ display, variant }: NavbarTitleProps) => (
 
 const Navbar = () => {
   const userId = localStorage.getItem("userId");
-
   const [user, setUser] = React.useState({} as IUser);
 
   React.useEffect(() => {
@@ -61,7 +64,7 @@ const Navbar = () => {
       setUser(response.data);
     };
     fetchUser();
-  }, []);
+  }, [userId]);
 
   const isAuthenticated = useIsAuthenticated((state) => state.isAuthenticated);
   const setIsAuthenticated = useIsAuthenticated(
@@ -193,7 +196,18 @@ const Navbar = () => {
                   pages.map(({ title, onClick }) => (
                     <Button
                       onClick={() => onClick()}
-                      sx={{ my: 2, color: "white", display: "block" }}
+                      sx={{
+                        my: 2,
+                        color: muiTheme.palette.text.secondary,
+                        display: "block",
+                        transition: "transform 0.3s ease",
+                        "&:hover": {
+                          transform: "translateY(-3px)",
+                        },
+                        fontSize: { xs: "0.9rem", sm: "1rem", md: "1.1rem" },
+                        fontWeight: 400,
+                        letterSpacing: ".03rem",
+                      }}
                     >
                       {title}
                     </Button>
@@ -209,6 +223,17 @@ const Navbar = () => {
                     <Avatar
                       alt="Remy Sharp"
                       src={serverLink + user.profileImage}
+                      sx={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: "50%",
+                        boxShadow: `0 0 10px ${muiTheme.palette.primary.main}`, // Glowing effect
+                        transition: "all 0.3s ease", // Smooth transition for hover effects
+                        "&:hover": {
+                          transform: "translateY(-5px)", // Slight upward movement on hover
+                          boxShadow: `0 0 15px ${muiTheme.palette.primary.main}`, // Enhanced glow on hover
+                        },
+                      }}
                     />
                   </IconButton>
                 </Tooltip>

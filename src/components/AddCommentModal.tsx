@@ -1,7 +1,7 @@
 import { Box, Modal, Typography, Button, TextField } from "@mui/material";
 import { styled } from "@mui/system";
 import muiTheme from "../themes/muiTheme";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { commentLink, gameLink } from "../utils/constants/serverLink";
@@ -46,10 +46,28 @@ const AddCommentModal = ({ open, onClose, gameId }: AddCommentModalProps) => {
   const navigate = useNavigate();
 
   const [description, setDescription] = useState("");
+  const [error, setError] = useState("");
 
   const connectedUser = localStorage.getItem("userId");
 
+  useEffect(() => {
+    // Clear error when description changes
+    setError("");
+  }, [description]);
+
+  const validateDescription = () => {
+    if (description.length < 2 || description.length > 120) {
+      setError("Description must be between 2-120 characters long.");
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = async () => {
+    if (!validateDescription()) {
+      return;
+    }
+
     try {
       const newComment: NewCommentType = {
         description: description,
@@ -61,12 +79,15 @@ const AddCommentModal = ({ open, onClose, gameId }: AddCommentModalProps) => {
         .post(`${commentLink}`, newComment)
         .then((response) => response.data)
         .then((response) => {
-          axios.put(`${gameLink}addComment/${gameId}`, {
-            commentId: response._id,
-          });
-          setDescription("");
-          onClose();
-          navigate(`/game/${gameId}`);
+          axios
+            .put(`${gameLink}addComment/${gameId}`, {
+              commentId: response._id,
+            })
+            .then(() => {
+              setDescription("");
+              onClose();
+              navigate(`/game/${gameId}`);
+            });
         });
     } catch (error) {
       console.error("Creating new comment failed:", error);
@@ -109,6 +130,8 @@ const AddCommentModal = ({ open, onClose, gameId }: AddCommentModalProps) => {
           rows={4}
           margin="normal"
           variant="outlined"
+          error={!!error}
+          helperText={error}
         />
         <Button
           onClick={handleSubmit}
