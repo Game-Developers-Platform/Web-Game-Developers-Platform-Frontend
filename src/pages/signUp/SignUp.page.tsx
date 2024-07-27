@@ -191,6 +191,10 @@ const SignUpPage = () => {
           },
         });
 
+        if (filteredPlatforms?.length > 0) {
+          formData.socialNetworks = filteredPlatforms;
+        }
+
         await usePost(`${authLink}/register`, {
           ...formData,
           profileImage: uploadResponse.data.file,
