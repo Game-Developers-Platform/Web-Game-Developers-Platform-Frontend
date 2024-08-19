@@ -9,8 +9,6 @@ Welcome to the Web Game Developers Platform Frontend repository! This React-base
 - [Installation](#installation)
 - [Usage](#usage)
 - [Configuration](#configuration)
-- [Development](#development)
-- [Contributing](#contributing)
 - [License](#license)
 
 ## Project Overview
@@ -68,22 +66,6 @@ To get started with the project, follow these steps:
 REACT_APP_API_URL=http://localhost:5000/api
 ```
 Adjust the `REACT_APP_API_URL` to match your backend server.
-
-## Development
-
-- **Code Style:** Follow the [Airbnb JavaScript Style Guide](https://github.com/airbnb/javascript).
-- **Testing:** Use `npm test` to run the test suite.
-- **Build:** Use `npm run build` to create a production-ready build.
-
-## Contributing
-
-Contributions are welcome! Please follow these steps to contribute:
-
-1. Fork the repository.
-2. Create a new branch (`git checkout -b feature/your-feature`).
-3. Commit your changes (`git commit -am 'Add new feature'`).
-4. Push to the branch (`git push origin feature/your-feature`).
-5. Create a new Pull Request.
 
 ## License
 
