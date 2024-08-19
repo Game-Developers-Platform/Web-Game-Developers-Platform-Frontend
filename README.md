@@ -1,31 +1,90 @@
-# React + TypeScript + Vite
+# Web Game Developers Platform Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Welcome to the Web Game Developers Platform Frontend repository! This React-based web application is part of a comprehensive game development platform designed to streamline game management and interaction for developers.
 
-Currently, two official plugins are available:
+## Table of Contents
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- [Project Overview](#project-overview)
+- [Features](#features)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Configuration](#configuration)
+- [Development](#development)
+- [Contributing](#contributing)
+- [License](#license)
 
-## Expanding the ESLint configuration
+## Project Overview
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+The Web Game Developers Platform Frontend provides a dynamic and user-friendly interface for game developers to manage and showcase their games. Built using React and Material-UI, the application offers a responsive design and rich feature set for an optimal user experience.
 
-- Configure the top-level `parserOptions` property like this:
+## Features
 
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-  },
-}
+- **Dynamic Home Page:** Displays featured games with search and filter functionality.
+- **Game Details Page:** Shows detailed information about individual games, including images, descriptions, and developer links.
+- **Profile Management:** Allows users to manage their profiles, view their games, and edit profile information.
+- **Authentication:** Secure sign-in and sign-up functionality using JWT for token-based authentication.
+- **Responsive Design:** Optimized for both desktop and mobile devices.
+
+## Installation
+
+To get started with the project, follow these steps:
+
+1. **Clone the repository:**
+
+   ```bash
+   git clone https://github.com/Game-Developers-Platform/Web-Game-Developers-Platform-Frontend.git
+   ```
+
+2. **Navigate to the project directory:**
+
+   ```bash
+   cd Web-Game-Developers-Platform-Frontend
+   ```
+
+3. **Install Dependencies:**
+
+   ```bash
+   npm install
+   ```
+
+4. **Start the development server:**
+
+   ```bash
+   npm start
+   ```
+
+## Usage
+
+- **Home Page:** Browse featured games, search by title or filter by category.
+- **Game Details Page:** View detailed information about each game and interact with platform links.
+- **Profile Page:** Update your profile information, view your games, and manage settings.
+- **Sign-In/Sign-Up:** Use the authentication system to securely access and manage your account.
+   
+## Configuration
+
+- **Environment Variables:** Create a `.env` file in the root directory and configure the following variables:
+
+```env
+REACT_APP_API_URL=http://localhost:5000/api
 ```
+Adjust the `REACT_APP_API_URL` to match your backend server.
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
-"# Web-Game-Developers-Platform-Frontend" 
+## Development
+
+- **Code Style:** Follow the [Airbnb JavaScript Style Guide](https://github.com/airbnb/javascript).
+- **Testing:** Use `npm test` to run the test suite.
+- **Build:** Use `npm run build` to create a production-ready build.
+
+## Contributing
+
+Contributions are welcome! Please follow these steps to contribute:
+
+1. Fork the repository.
+2. Create a new branch (`git checkout -b feature/your-feature`).
+3. Commit your changes (`git commit -am 'Add new feature'`).
+4. Push to the branch (`git push origin feature/your-feature`).
+5. Create a new Pull Request.
+
+## License
+
+This project is licensed under the MIT License.
